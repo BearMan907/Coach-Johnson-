@@ -1,14 +1,72 @@
 import streamlit as st
 import pandas as pd
+import plotly.graph_objects as go
+from streamlit_calendar import calendar
 import json
 import re
+import html
 from pathlib import Path
 from datetime import date, datetime
 
 DATA_DIR = Path(__file__).parent / "data" / "clients"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-st.set_page_config(page_title="HotshotHunterCoach Dashboard", layout="wide")
+st.set_page_config(page_title="HotshotHunterCoach Dashboard", layout="wide", page_icon="\U0001F3D4")
+
+
+# ---------- palette (dataviz skill, dark-mode validated set) ----------
+
+CHROME = {
+    "surface": "#1a1a19",
+    "page": "#0d0d0d",
+    "text_primary": "#ffffff",
+    "text_secondary": "#c3c2b7",
+    "muted": "#898781",
+    "grid": "#2c2c2a",
+    "baseline": "#383835",
+}
+
+METRIC_COLOR = {
+    "weight": "#3987e5",
+    "body_fat": "#199e70",
+    "strength": "#c98500",
+    "vo2max": "#008300",
+    "muscle": "#9085e9",
+    "waist": "#d55181",
+    "other": "#d95926",
+}
+
+STATUS_COLOR = {"good": "#0ca30c", "warning": "#fab219", "critical": "#d03b3b"}
+
+BODY_METRICS = [
+    ("weight_lb", "Weight (lb)", METRIC_COLOR["weight"]),
+    ("body_fat_pct", "Body Fat %", METRIC_COLOR["body_fat"]),
+    ("vo2_max", "VO2 Max (ml/kg/min)", METRIC_COLOR["vo2max"]),
+    ("skeletal_muscle_lb", "Skeletal Muscle (lb)", METRIC_COLOR["muscle"]),
+    ("waist_in", "Waist (in)", METRIC_COLOR["waist"]),
+    ("bmi", "BMI", METRIC_COLOR["other"]),
+]
+
+CAL_OPTIONS = {
+    "initialView": "dayGridMonth",
+    "height": 600,
+    "headerToolbar": {"left": "prev,next today", "center": "title", "right": ""},
+    "editable": False,
+}
+
+CAL_CSS = """
+.fc { background-color: #1a1a19; color: #c3c2b7; }
+.fc-theme-standard td, .fc-theme-standard th { border-color: #2c2c2a; }
+.fc-col-header-cell-cushion { color: #898781; }
+.fc-daygrid-day-number { color: #c3c2b7; }
+.fc-daygrid-day.fc-day-today { background-color: #2c2c2a; }
+.fc-toolbar-title { color: #ffffff; }
+.fc-button-primary { background-color: #c98500 !important; border-color: #c98500 !important; }
+.fc-button-primary:hover { background-color: #d95926 !important; border-color: #d95926 !important; }
+.fc-event { border: none; }
+"""
+
+EXERCISE_ROWS = 6
 
 
 # ---------- storage ----------
@@ -74,7 +132,166 @@ def status_flag(client):
         return f"At risk ({gap}d ago)", "\U0001F534"
 
 
-# ---------- pages ----------
+def build_body_df(client):
+    rows = []
+    b = client.get("baseline", {})
+    if b.get("weight_lb") or b.get("waist_in"):
+        rows.append({"date": b.get("date"), "weight_lb": b.get("weight_lb"), "waist_in": b.get("waist_in")})
+    for c in client.get("checkins", []):
+        rows.append(c)
+    if not rows:
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    df["date"] = pd.to_datetime(df["date"])
+    df = df.sort_values("date")
+    return df
+
+
+def build_calendar_events(client):
+    events = []
+    for d, w in client.get("workouts", {}).items():
+        wstatus = w.get("status", "planned")
+        color = {
+            "planned": METRIC_COLOR["weight"],
+            "completed": STATUS_COLOR["good"],
+            "missed": STATUS_COLOR["critical"],
+        }.get(wstatus, METRIC_COLOR["weight"])
+        n = len(w.get("exercises", []))
+        title = f"{n} exercise{'s' if n != 1 else ''}" if n else (w.get("day_notes") or "Workout")
+        events.append({"title": title, "start": d, "end": d, "allDay": True, "color": color})
+    return events
+
+
+# ---------- charts ----------
+
+def interactive_line_chart(df, x_col, y_col, color, y_label):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df[x_col], y=df[y_col],
+        mode="lines+markers",
+        line=dict(color=color, width=2),
+        marker=dict(size=8, color=color, line=dict(width=2, color=CHROME["surface"])),
+        hovertemplate="%{x|%b %d, %Y}<br><b>%{y}</b> " + y_label + "<extra></extra>",
+    ))
+    fig.update_layout(
+        paper_bgcolor=CHROME["surface"],
+        plot_bgcolor=CHROME["surface"],
+        font=dict(color=CHROME["text_secondary"], family="system-ui, -apple-system, Segoe UI, sans-serif", size=13),
+        xaxis=dict(gridcolor=CHROME["grid"], linecolor=CHROME["baseline"], tickfont=dict(color=CHROME["muted"])),
+        yaxis=dict(title=y_label, gridcolor=CHROME["grid"], linecolor=CHROME["baseline"], tickfont=dict(color=CHROME["muted"])),
+        margin=dict(l=10, r=10, t=30, b=10),
+        height=320,
+        hoverlabel=dict(bgcolor=CHROME["surface"], font_color=CHROME["text_primary"], bordercolor=color),
+        showlegend=False,
+    )
+    return fig
+
+
+def render_body_charts(client):
+    df = build_body_df(client)
+    if df.empty:
+        st.info("No check-ins logged yet.")
+        return
+
+    available = [(col, label, color) for col, label, color in BODY_METRICS
+                 if col in df.columns and df[col].notna().any()]
+    if not available:
+        st.info("No metrics logged yet.")
+        return
+
+    cols = st.columns(2)
+    for i, (col, label, color) in enumerate(available):
+        mdf = df[["date", col]].dropna()
+        with cols[i % 2]:
+            latest = mdf.iloc[-1][col]
+            st.metric(label, f"{latest:g}")
+            fig = interactive_line_chart(mdf, "date", col, color, label)
+            st.plotly_chart(fig, use_container_width=True, key=f"chart_{client['id']}_{col}")
+
+    with st.expander("Raw check-in data"):
+        st.dataframe(df.sort_values("date", ascending=False), use_container_width=True, hide_index=True)
+
+
+# ---------- workout calendar + form ----------
+
+def render_workout_form(client, target_date):
+    key_date = str(target_date)
+    existing = client.get("workouts", {}).get(key_date, {})
+    existing_ex = existing.get("exercises", [])
+    st.markdown(f"**Workout — {target_date.strftime('%A, %b %d, %Y')}**")
+    with st.form(f"workout_form_{client['id']}_{key_date}"):
+        wstatus = st.selectbox(
+            "Status", ["planned", "completed", "missed"],
+            index=["planned", "completed", "missed"].index(existing.get("status", "planned")),
+        )
+        rows = []
+        for i in range(EXERCISE_ROWS):
+            e = existing_ex[i] if i < len(existing_ex) else {}
+            c1, c2, c3, c4 = st.columns([3, 1, 1, 2])
+            vis = "visible" if i == 0 else "collapsed"
+            name = c1.text_input("Exercise", value=e.get("name", ""), key=f"wf_name_{client['id']}_{key_date}_{i}",
+                                  label_visibility=vis, placeholder="Exercise")
+            sets = c2.number_input("Sets", min_value=0, step=1, value=int(e.get("sets") or 0),
+                                    key=f"wf_sets_{client['id']}_{key_date}_{i}", label_visibility=vis)
+            reps = c3.text_input("Reps", value=e.get("reps", ""), key=f"wf_reps_{client['id']}_{key_date}_{i}",
+                                  label_visibility=vis, placeholder="8-10")
+            note = c4.text_input("Load / notes", value=e.get("load_note", ""), key=f"wf_note_{client['id']}_{key_date}_{i}",
+                                  label_visibility=vis, placeholder="Load / cues")
+            rows.append({"name": name, "sets": sets, "reps": reps, "load_note": note})
+        day_notes = st.text_area("Day notes", value=existing.get("day_notes", ""))
+        if st.form_submit_button("Save workout"):
+            exercises = [r for r in rows if r["name"].strip()]
+            client.setdefault("workouts", {})[key_date] = {
+                "exercises": exercises, "status": wstatus, "day_notes": day_notes,
+            }
+            save_client(client)
+            st.success("Workout saved.")
+            st.rerun()
+
+
+def tab_program_calendar(client):
+    st.subheader("Program Calendar")
+    st.caption("Click a day to add or edit that day's workout.")
+    events = build_calendar_events(client)
+    state_key = f"cal_selected_date_{client['id']}"
+    cal_state = calendar(events=events, options=CAL_OPTIONS, custom_css=CAL_CSS,
+                          callbacks=["dateClick"], key=f"trainer_cal_{client['id']}")
+    if cal_state and cal_state.get("callback") == "dateClick":
+        st.session_state[state_key] = cal_state["dateClick"]["date"][:10]
+
+    selected_str = st.session_state.get(state_key, str(date.today()))
+    selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
+
+    st.divider()
+    render_workout_form(client, selected)
+
+
+def render_readonly_calendar(client):
+    st.subheader("Program Calendar")
+    events = build_calendar_events(client)
+    state_key = f"client_cal_selected_{client['id']}"
+    cal_state = calendar(events=events, options=CAL_OPTIONS, custom_css=CAL_CSS,
+                          callbacks=["dateClick"], key=f"client_cal_{client['id']}")
+    if cal_state and cal_state.get("callback") == "dateClick":
+        st.session_state[state_key] = cal_state["dateClick"]["date"][:10]
+
+    selected_str = st.session_state.get(state_key)
+    if selected_str:
+        workout = client.get("workouts", {}).get(selected_str)
+        selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
+        st.markdown(f"**{selected.strftime('%A, %b %d, %Y')}**")
+        if not workout or not workout.get("exercises"):
+            st.caption("No workout planned for this day.")
+        else:
+            st.caption(f"Status: {workout.get('status', 'planned').title()}")
+            for e in workout["exercises"]:
+                extra = f" · {e['load_note']}" if e.get("load_note") else ""
+                st.write(f"- **{e['name']}** — {e.get('sets', '')} x {e.get('reps', '')}{extra}")
+            if workout.get("day_notes"):
+                st.caption(workout["day_notes"])
+
+
+# ---------- trainer pages ----------
 
 def page_roster():
     st.title("Roster")
@@ -92,7 +309,7 @@ def page_roster():
             "Name": c["name"],
             "Primary Goal": c.get("goals", {}).get("primary", ""),
             "Status": label,
-            "Sessions Logged": len(c.get("lift_entries", [])) ,
+            "Sessions Logged": len(c.get("lift_entries", [])),
             "Check-ins": len(c.get("checkins", [])),
         })
     df = pd.DataFrame(rows)
@@ -103,7 +320,7 @@ def page_roster():
     picked = st.selectbox("Open a client profile", options=list(names.keys()))
     if st.button("Go to profile"):
         st.session_state["selected_client_id"] = names[picked]
-        st.session_state["nav"] = "Client Profile"
+        st.session_state["trainer_nav"] = "Client Workspace"
         st.rerun()
 
 
@@ -121,6 +338,7 @@ def page_add_client():
         st.subheader("Goals")
         primary_goal = st.text_input("Primary goal (e.g. lose 20 lbs, deadlift 2x bodyweight)")
         goal_why = st.text_area("Why this matters to them (their words)")
+        mantra = st.text_input("Mantra (shown at the top of their page)")
 
         st.subheader("Health flags")
         injuries = st.text_input("Injuries / limitations (comma separated)")
@@ -144,6 +362,7 @@ def page_add_client():
                     "start_date": str(start_date),
                     "contact": {"phone": phone, "email": email},
                     "goals": {"primary": primary_goal, "why": goal_why},
+                    "mantra": mantra.strip(),
                     "health_flags": {
                         "injuries": [i.strip() for i in injuries.split(",") if i.strip()]
                     },
@@ -155,42 +374,14 @@ def page_add_client():
                     "checkins": [],
                     "lift_entries": [],
                     "milestones": [],
+                    "workouts": {},
                     "status": "active",
                 }
                 save_client(client)
                 st.success(f"Saved {name}.")
                 st.session_state["selected_client_id"] = client_id
-                st.session_state["nav"] = "Client Profile"
+                st.session_state["trainer_nav"] = "Client Workspace"
                 st.rerun()
-
-
-def page_client_profile():
-    st.title("Client Profile")
-    clients = list_clients()
-    if not clients:
-        st.info("No clients yet. Add one from the sidebar first.")
-        return
-
-    names = {c["name"]: c["id"] for c in clients}
-    default_id = st.session_state.get("selected_client_id")
-    default_name = next((n for n, i in names.items() if i == default_id), list(names.keys())[0])
-    picked_name = st.selectbox("Client", options=list(names.keys()), index=list(names.keys()).index(default_name))
-    client_id = names[picked_name]
-    st.session_state["selected_client_id"] = client_id
-    client = load_client(client_id)
-
-    tabs = st.tabs(["Overview", "Log Entry", "Strength Charts", "Weight & Measurements", "Milestones"])
-
-    with tabs[0]:
-        tab_overview(client)
-    with tabs[1]:
-        tab_log_entry(client)
-    with tabs[2]:
-        tab_strength_charts(client)
-    with tabs[3]:
-        tab_weight_charts(client)
-    with tabs[4]:
-        tab_milestones(client)
 
 
 def tab_overview(client):
@@ -199,6 +390,8 @@ def tab_overview(client):
         st.subheader("Goals")
         st.write(f"**Primary:** {client['goals'].get('primary') or '—'}")
         st.write(f"**Why:** {client['goals'].get('why') or '—'}")
+        st.subheader("Mantra")
+        st.write(f"“{client.get('mantra') or '—'}”")
         st.subheader("Contact")
         st.write(f"Phone: {client['contact'].get('phone') or '—'}")
         st.write(f"Email: {client['contact'].get('email') or '—'}")
@@ -219,6 +412,7 @@ def tab_overview(client):
             email = st.text_input("Email", value=client["contact"].get("email", ""))
             primary_goal = st.text_input("Primary goal", value=client["goals"].get("primary", ""))
             goal_why = st.text_area("Why", value=client["goals"].get("why", ""))
+            mantra = st.text_input("Mantra", value=client.get("mantra", ""))
             injuries_text = st.text_input("Injuries / limitations (comma separated)",
                                            value=", ".join(client["health_flags"].get("injuries", [])))
             status = st.selectbox("Status", options=["active", "paused", "ended"],
@@ -227,6 +421,7 @@ def tab_overview(client):
                 client["name"] = name.strip()
                 client["contact"] = {"phone": phone, "email": email}
                 client["goals"] = {"primary": primary_goal, "why": goal_why}
+                client["mantra"] = mantra.strip()
                 client["health_flags"] = {"injuries": [i.strip() for i in injuries_text.split(",") if i.strip()]}
                 client["status"] = status
                 save_client(client)
@@ -234,21 +429,38 @@ def tab_overview(client):
                 st.rerun()
 
 
-def tab_log_entry(client):
-    st.subheader("Log a check-in (weight / measurements)")
+def tab_body_metrics(client):
+    st.subheader("Log a body composition check-in")
     with st.form("checkin_form", clear_on_submit=True):
         c_date = st.date_input("Date", value=date.today(), key="checkin_date")
-        col1, col2 = st.columns(2)
-        with col1:
-            weight = st.number_input("Weight (lb)", min_value=0.0, step=0.5)
-        with col2:
-            waist = st.number_input("Waist (in, optional)", min_value=0.0, step=0.5)
+        c1, c2, c3 = st.columns(3)
+        weight = c1.number_input("Weight (lb)", min_value=0.0, step=0.5)
+        waist = c2.number_input("Waist (in)", min_value=0.0, step=0.5)
+        vo2_max = c3.number_input("VO2 max (ml/kg/min)", min_value=0.0, step=0.1)
+
+        st.caption("InBody scan fields (optional)")
+        c4, c5, c6 = st.columns(3)
+        body_fat_pct = c4.number_input("Body fat %", min_value=0.0, max_value=100.0, step=0.1)
+        skeletal_muscle_lb = c5.number_input("Skeletal muscle mass (lb)", min_value=0.0, step=0.1)
+        bmi = c6.number_input("BMI", min_value=0.0, step=0.1)
+        c7, c8 = st.columns(2)
+        visceral_fat_level = c7.number_input("Visceral fat level", min_value=0.0, step=1.0)
+        body_water_pct = c8.number_input("Body water %", min_value=0.0, max_value=100.0, step=0.1)
+        bmr = st.number_input("BMR (kcal/day)", min_value=0.0, step=10.0)
+
         notes = st.text_area("Notes (energy, sleep, wins, struggles)")
         if st.form_submit_button("Save check-in"):
             client.setdefault("checkins", []).append({
                 "date": str(c_date),
                 "weight_lb": weight or None,
                 "waist_in": waist or None,
+                "vo2_max": vo2_max or None,
+                "body_fat_pct": body_fat_pct or None,
+                "skeletal_muscle_lb": skeletal_muscle_lb or None,
+                "bmi": bmi or None,
+                "visceral_fat_level": visceral_fat_level or None,
+                "body_water_pct": body_water_pct or None,
+                "bmr": bmr or None,
                 "notes": notes,
             })
             save_client(client)
@@ -256,17 +468,18 @@ def tab_log_entry(client):
             st.rerun()
 
     st.divider()
+    render_body_charts(client)
+
+
+def tab_strength(client):
     st.subheader("Log a lift")
     with st.form("lift_form", clear_on_submit=True):
         l_date = st.date_input("Date", value=date.today(), key="lift_date")
         exercise = st.text_input("Exercise (e.g. Back Squat, Bench Press)")
         col1, col2, col3 = st.columns(3)
-        with col1:
-            load_lb = st.number_input("Load (lb)", min_value=0.0, step=2.5)
-        with col2:
-            reps = st.number_input("Reps", min_value=1, step=1, value=5)
-        with col3:
-            rpe = st.number_input("RPE (optional)", min_value=0.0, max_value=10.0, step=0.5)
+        load_lb = col1.number_input("Load (lb)", min_value=0.0, step=2.5)
+        reps = col2.number_input("Reps", min_value=1, step=1, value=5)
+        rpe = col3.number_input("RPE (optional)", min_value=0.0, max_value=10.0, step=0.5)
         if st.form_submit_button("Save lift"):
             if not exercise.strip():
                 st.error("Exercise name is required.")
@@ -293,8 +506,7 @@ def tab_log_entry(client):
                     st.success("Lift saved.")
                 st.rerun()
 
-
-def tab_strength_charts(client):
+    st.divider()
     entries = client.get("lift_entries", [])
     if not entries:
         st.info("No lifts logged yet.")
@@ -307,34 +519,10 @@ def tab_strength_charts(client):
     edf = edf.sort_values("date")
 
     st.metric("Best estimated 1RM", f"{edf['est_1rm'].max()} lb")
-    st.line_chart(edf.set_index("date")["est_1rm"], y_label="Estimated 1RM (lb)")
+    fig = interactive_line_chart(edf, "date", "est_1rm", METRIC_COLOR["strength"], "Estimated 1RM (lb)")
+    st.plotly_chart(fig, use_container_width=True, key=f"strength_chart_{client['id']}_{picked}")
     st.dataframe(edf[["date", "load_lb", "reps", "rpe", "est_1rm"]].sort_values("date", ascending=False),
                  use_container_width=True, hide_index=True)
-
-
-def tab_weight_charts(client):
-    checkins = client.get("checkins", [])
-    baseline = client.get("baseline", {})
-    rows = []
-    if baseline.get("weight_lb"):
-        rows.append({"date": baseline["date"], "weight_lb": baseline["weight_lb"], "waist_in": baseline.get("waist_in")})
-    for c in checkins:
-        if c.get("weight_lb"):
-            rows.append({"date": c["date"], "weight_lb": c["weight_lb"], "waist_in": c.get("waist_in")})
-
-    if not rows:
-        st.info("No weight data logged yet.")
-        return
-
-    df = pd.DataFrame(rows)
-    df["date"] = pd.to_datetime(df["date"])
-    df = df.sort_values("date").drop_duplicates(subset="date", keep="last")
-    st.line_chart(df.set_index("date")["weight_lb"], y_label="Weight (lb)")
-
-    if df["waist_in"].notna().any():
-        st.line_chart(df.set_index("date")["waist_in"], y_label="Waist (in)")
-
-    st.dataframe(df.sort_values("date", ascending=False), use_container_width=True, hide_index=True)
 
 
 def tab_milestones(client):
@@ -357,22 +545,114 @@ def tab_milestones(client):
             st.write(f"**{m['date']}** — {m['description']}")
 
 
+def page_trainer_client():
+    st.title("Client Workspace")
+    clients = list_clients()
+    if not clients:
+        st.info("No clients yet. Add one from the sidebar first.")
+        return
+
+    names = {c["name"]: c["id"] for c in clients}
+    default_id = st.session_state.get("selected_client_id")
+    default_name = next((n for n, i in names.items() if i == default_id), list(names.keys())[0])
+    picked_name = st.selectbox("Client", options=list(names.keys()), index=list(names.keys()).index(default_name))
+    client_id = names[picked_name]
+    st.session_state["selected_client_id"] = client_id
+    client = load_client(client_id)
+
+    tabs = st.tabs(["Overview", "Body Metrics", "Strength", "Program Calendar", "Milestones"])
+    with tabs[0]:
+        tab_overview(client)
+    with tabs[1]:
+        tab_body_metrics(client)
+    with tabs[2]:
+        tab_strength(client)
+    with tabs[3]:
+        tab_program_calendar(client)
+    with tabs[4]:
+        tab_milestones(client)
+
+
+# ---------- client-facing page ----------
+
+def render_mantra_banner(client):
+    mantra = client.get("mantra")
+    if not mantra:
+        return
+    safe_name = html.escape(client["name"])
+    safe_mantra = html.escape(mantra)
+    st.markdown(f"""
+<div style="background: linear-gradient(135deg, {METRIC_COLOR['strength']} 0%, {METRIC_COLOR['other']} 100%);
+            border-radius: 14px; padding: 22px 28px; margin-bottom: 22px;">
+  <div style="color: {CHROME['page']}; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+              text-transform: uppercase; opacity: 0.7;">{safe_name}'s mantra</div>
+  <div style="color: {CHROME['text_primary']}; font-size: 1.7rem; font-weight: 700; margin-top: 6px;">"{safe_mantra}"</div>
+</div>
+""", unsafe_allow_html=True)
+
+
+def page_client_view():
+    st.title("Client View")
+    clients = list_clients()
+    if not clients:
+        st.info("No clients yet.")
+        return
+    names = {c["name"]: c["id"] for c in clients}
+    picked_name = st.selectbox("Select client", options=list(names.keys()))
+    client = load_client(names[picked_name])
+
+    render_mantra_banner(client)
+
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.subheader(client["name"])
+        st.write(f"**Goal:** {client['goals'].get('primary') or '—'}")
+    with col2:
+        b = client.get("baseline", {})
+        df = build_body_df(client)
+        if not df.empty and "weight_lb" in df.columns and df["weight_lb"].notna().any():
+            current = df["weight_lb"].dropna().iloc[-1]
+            start = b.get("weight_lb")
+            delta = round(current - start, 1) if start else None
+            st.metric("Weight", f"{current:g} lb", delta=f"{delta:+g} lb" if delta is not None else None,
+                       delta_color="off")
+
+    st.divider()
+    render_body_charts(client)
+
+    st.divider()
+    render_readonly_calendar(client)
+
+    st.divider()
+    st.subheader("Milestones")
+    milestones = client.get("milestones", [])
+    if not milestones:
+        st.caption("No milestones yet.")
+    else:
+        for m in sorted(milestones, key=lambda m: m["date"], reverse=True):
+            st.write(f"**{m['date']}** — {m['description']}")
+
+
 # ---------- nav ----------
 
-st.sidebar.title("HotshotHunterCoach")
-if "nav" not in st.session_state:
-    st.session_state["nav"] = "Roster"
+st.sidebar.title("\U0001F3D4 HotshotHunterCoach")
+mode = st.sidebar.radio("Mode", ["Trainer", "Client View"])
 
-nav = st.sidebar.radio(
-    "Navigate",
-    ["Roster", "Add Client", "Client Profile"],
-    index=["Roster", "Add Client", "Client Profile"].index(st.session_state["nav"]),
-)
-st.session_state["nav"] = nav
+if mode == "Trainer":
+    if "trainer_nav" not in st.session_state:
+        st.session_state["trainer_nav"] = "Roster"
+    trainer_nav = st.sidebar.radio(
+        "Trainer Menu",
+        ["Roster", "Add Client", "Client Workspace"],
+        index=["Roster", "Add Client", "Client Workspace"].index(st.session_state["trainer_nav"]),
+    )
+    st.session_state["trainer_nav"] = trainer_nav
 
-if nav == "Roster":
-    page_roster()
-elif nav == "Add Client":
-    page_add_client()
-elif nav == "Client Profile":
-    page_client_profile()
+    if trainer_nav == "Roster":
+        page_roster()
+    elif trainer_nav == "Add Client":
+        page_add_client()
+    elif trainer_nav == "Client Workspace":
+        page_trainer_client()
+else:
+    page_client_view()
