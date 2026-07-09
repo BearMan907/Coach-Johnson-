@@ -66,7 +66,10 @@ CAL_CSS = """
 .fc-event { border: none; }
 """
 
-EXERCISE_ROWS = 6
+EXERCISE_LIBRARY_PATH = Path(__file__).parent / "data" / "exercise_library.json"
+
+BLOCK_SPEC = [("Block 1", ["1A", "1B", "1C"]), ("Block 2", ["2A", "2B"])]
+FINISHER_SLOTS = ["Finisher A", "Finisher B"]
 
 
 # ---------- storage ----------
@@ -147,6 +150,50 @@ def build_body_df(client):
     return df
 
 
+def load_exercise_library():
+    return json.loads(EXERCISE_LIBRARY_PATH.read_text())
+
+
+def exercise_options():
+    lib = load_exercise_library()
+    return [""] + sorted(e["name"] for e in lib)
+
+
+def last_performance(client, exercise_name, before_date=None):
+    if not exercise_name:
+        return None
+    entries = [e for e in client.get("lift_entries", [])
+               if e["exercise"].strip().lower() == exercise_name.strip().lower()]
+    if before_date:
+        entries = [e for e in entries if e["date"] < str(before_date)]
+    if not entries:
+        return None
+    return max(entries, key=lambda e: e["date"])
+
+
+def empty_slot(label):
+    return {"slot": label, "exercise": "", "sets": 0, "reps": "", "weight": "", "rest_sec": 0}
+
+
+def get_workout(client, key_date):
+    w = client.get("workouts", {}).get(key_date)
+    if w:
+        return w
+    return {
+        "warmup": {"duration_min": 10, "notes": ""},
+        "blocks": [{"label": label, "slots": [empty_slot(s) for s in slots]} for label, slots in BLOCK_SPEC],
+        "finisher": {"slots": [empty_slot(s) for s in FINISHER_SLOTS]},
+        "status": "planned",
+        "day_notes": "",
+    }
+
+
+def workout_exercise_count(workout):
+    count = sum(1 for b in workout.get("blocks", []) for s in b.get("slots", []) if s.get("exercise"))
+    count += sum(1 for s in workout.get("finisher", {}).get("slots", []) if s.get("exercise"))
+    return count
+
+
 def build_calendar_events(client):
     events = []
     for d, w in client.get("workouts", {}).items():
@@ -156,7 +203,7 @@ def build_calendar_events(client):
             "completed": STATUS_COLOR["good"],
             "missed": STATUS_COLOR["critical"],
         }.get(wstatus, METRIC_COLOR["weight"])
-        n = len(w.get("exercises", []))
+        n = workout_exercise_count(w)
         title = f"{n} exercise{'s' if n != 1 else ''}" if n else (w.get("day_notes") or "Workout")
         events.append({"title": title, "start": d, "end": d, "allDay": True, "color": color})
     return events
@@ -214,39 +261,100 @@ def render_body_charts(client):
 
 # ---------- workout calendar + form ----------
 
-def render_workout_form(client, target_date):
+def render_slot_editor(client, prefix, existing_slots, slot_labels, options):
+    rows = []
+    for label in slot_labels:
+        existing = next((s for s in existing_slots if s.get("slot") == label), empty_slot(label))
+        st.markdown(f"**{label}**")
+        c1, c2, c3, c4, c5 = st.columns([3, 1, 1, 1.3, 1])
+        cur = existing.get("exercise", "")
+        idx = options.index(cur) if cur in options else 0
+        exercise = c1.selectbox("Exercise", options, index=idx, key=f"{prefix}_{label}_ex")
+        sets = c2.number_input("Sets", min_value=0, step=1, value=int(existing.get("sets") or 0),
+                                key=f"{prefix}_{label}_sets")
+        reps = c3.text_input("Reps", value=existing.get("reps", ""), key=f"{prefix}_{label}_reps", placeholder="8-10")
+        weight = c4.text_input("Weight", value=existing.get("weight", ""), key=f"{prefix}_{label}_weight",
+                                placeholder="lb or RPE")
+        rest_sec = c5.number_input("Rest (sec)", min_value=0, step=15, value=int(existing.get("rest_sec") or 0),
+                                    key=f"{prefix}_{label}_rest")
+        if exercise:
+            last = last_performance(client, exercise)
+            if last:
+                st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']} (on {last['date']})")
+            else:
+                st.caption("No prior log for this exercise yet.")
+        rows.append({"slot": label, "exercise": exercise, "sets": sets, "reps": reps,
+                     "weight": weight, "rest_sec": rest_sec})
+    return rows
+
+
+def render_workout_editor(client, target_date):
     key_date = str(target_date)
-    existing = client.get("workouts", {}).get(key_date, {})
-    existing_ex = existing.get("exercises", [])
-    st.markdown(f"**Workout — {target_date.strftime('%A, %b %d, %Y')}**")
-    with st.form(f"workout_form_{client['id']}_{key_date}"):
-        wstatus = st.selectbox(
-            "Status", ["planned", "completed", "missed"],
-            index=["planned", "completed", "missed"].index(existing.get("status", "planned")),
-        )
-        rows = []
-        for i in range(EXERCISE_ROWS):
-            e = existing_ex[i] if i < len(existing_ex) else {}
-            c1, c2, c3, c4 = st.columns([3, 1, 1, 2])
-            vis = "visible" if i == 0 else "collapsed"
-            name = c1.text_input("Exercise", value=e.get("name", ""), key=f"wf_name_{client['id']}_{key_date}_{i}",
-                                  label_visibility=vis, placeholder="Exercise")
-            sets = c2.number_input("Sets", min_value=0, step=1, value=int(e.get("sets") or 0),
-                                    key=f"wf_sets_{client['id']}_{key_date}_{i}", label_visibility=vis)
-            reps = c3.text_input("Reps", value=e.get("reps", ""), key=f"wf_reps_{client['id']}_{key_date}_{i}",
-                                  label_visibility=vis, placeholder="8-10")
-            note = c4.text_input("Load / notes", value=e.get("load_note", ""), key=f"wf_note_{client['id']}_{key_date}_{i}",
-                                  label_visibility=vis, placeholder="Load / cues")
-            rows.append({"name": name, "sets": sets, "reps": reps, "load_note": note})
-        day_notes = st.text_area("Day notes", value=existing.get("day_notes", ""))
-        if st.form_submit_button("Save workout"):
-            exercises = [r for r in rows if r["name"].strip()]
-            client.setdefault("workouts", {})[key_date] = {
-                "exercises": exercises, "status": wstatus, "day_notes": day_notes,
-            }
-            save_client(client)
-            st.success("Workout saved.")
-            st.rerun()
+    workout = get_workout(client, key_date)
+    st.markdown(f"### {target_date.strftime('%A, %b %d, %Y')}")
+
+    options = exercise_options()
+
+    st.subheader("Warmup / Stretch")
+    c1, c2 = st.columns([1, 3])
+    warmup_min = c1.number_input("Duration (min)", min_value=0, step=5,
+                                  value=int(workout.get("warmup", {}).get("duration_min") or 10),
+                                  key=f"warmup_min_{client['id']}_{key_date}")
+    warmup_notes = c2.text_input("Notes", value=workout.get("warmup", {}).get("notes", ""),
+                                  key=f"warmup_notes_{client['id']}_{key_date}")
+
+    new_blocks = []
+    for label, slot_labels in BLOCK_SPEC:
+        st.subheader(label)
+        existing_block = next((b for b in workout.get("blocks", []) if b.get("label") == label), {"slots": []})
+        block_rows = render_slot_editor(client, f"blk_{client['id']}_{key_date}_{label}",
+                                         existing_block.get("slots", []), slot_labels, options)
+        new_blocks.append({"label": label, "slots": block_rows})
+
+    st.subheader("FINISHER")
+    finisher_rows = render_slot_editor(client, f"fin_{client['id']}_{key_date}",
+                                        workout.get("finisher", {}).get("slots", []), FINISHER_SLOTS, options)
+
+    wstatus = st.selectbox("Status", ["planned", "completed", "missed"],
+                            index=["planned", "completed", "missed"].index(workout.get("status", "planned")),
+                            key=f"wstatus_{client['id']}_{key_date}")
+    day_notes = st.text_area("Day notes", value=workout.get("day_notes", ""), key=f"daynotes_{client['id']}_{key_date}")
+
+    all_slots = [s for b in new_blocks for s in b["slots"]] + finisher_rows
+    filled_slots = [s for s in all_slots if s["exercise"]]
+
+    actual_inputs = {}
+    if wstatus == "completed" and filled_slots:
+        st.info("Log what was actually performed — this feeds the strength chart and next time's reference.")
+        for s in filled_slots:
+            c1, c2 = st.columns(2)
+            aw = c1.number_input(f"Actual weight — {s['slot']} {s['exercise']}", min_value=0.0, step=2.5,
+                                  key=f"actual_w_{client['id']}_{key_date}_{s['slot']}")
+            ar = c2.number_input(f"Actual reps — {s['slot']} {s['exercise']}", min_value=0, step=1,
+                                  key=f"actual_r_{client['id']}_{key_date}_{s['slot']}")
+            actual_inputs[s["slot"]] = (s["exercise"], aw, ar)
+
+    if st.button("Save workout", key=f"save_workout_{client['id']}_{key_date}"):
+        client.setdefault("workouts", {})[key_date] = {
+            "warmup": {"duration_min": warmup_min, "notes": warmup_notes},
+            "blocks": new_blocks,
+            "finisher": {"slots": finisher_rows},
+            "status": wstatus,
+            "day_notes": day_notes,
+        }
+        for slot_label, (ex_name, aw, ar) in actual_inputs.items():
+            if aw and ar:
+                client.setdefault("lift_entries", []).append({
+                    "date": key_date,
+                    "exercise": ex_name,
+                    "load_lb": aw,
+                    "reps": int(ar),
+                    "rpe": None,
+                    "est_1rm": epley_1rm(aw, int(ar)),
+                })
+        save_client(client)
+        st.success("Workout saved.")
+        st.rerun()
 
 
 def tab_program_calendar(client):
@@ -263,7 +371,40 @@ def tab_program_calendar(client):
     selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
 
     st.divider()
-    render_workout_form(client, selected)
+    render_workout_editor(client, selected)
+
+
+def render_workout_readonly(client, workout):
+    warmup = workout.get("warmup", {})
+    if warmup.get("duration_min") or warmup.get("notes"):
+        note = f" · {warmup['notes']}" if warmup.get("notes") else ""
+        st.write(f"**Warmup / Stretch** — {warmup.get('duration_min', 0)} min{note}")
+
+    for b in workout.get("blocks", []):
+        filled = [s for s in b.get("slots", []) if s.get("exercise")]
+        if not filled:
+            continue
+        st.write(f"**{b['label']}**")
+        for s in filled:
+            extra = f" · {s['weight']}" if s.get("weight") else ""
+            rest = f" · rest {s['rest_sec']}s" if s.get("rest_sec") else ""
+            st.write(f"- {s['slot']}) **{s['exercise']}** — {s.get('sets', '')} x {s.get('reps', '')}{extra}{rest}")
+            last = last_performance(client, s["exercise"])
+            if last:
+                st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']}")
+
+    fin_filled = [s for s in workout.get("finisher", {}).get("slots", []) if s.get("exercise")]
+    if fin_filled:
+        st.write("**FINISHER**")
+        for s in fin_filled:
+            extra = f" · {s['weight']}" if s.get("weight") else ""
+            st.write(f"- **{s['exercise']}** — {s.get('sets', '')} x {s.get('reps', '')}{extra}")
+            last = last_performance(client, s["exercise"])
+            if last:
+                st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']}")
+
+    if workout.get("day_notes"):
+        st.caption(workout["day_notes"])
 
 
 def render_readonly_calendar(client):
@@ -280,15 +421,11 @@ def render_readonly_calendar(client):
         workout = client.get("workouts", {}).get(selected_str)
         selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
         st.markdown(f"**{selected.strftime('%A, %b %d, %Y')}**")
-        if not workout or not workout.get("exercises"):
+        if not workout or not workout_exercise_count(workout):
             st.caption("No workout planned for this day.")
         else:
             st.caption(f"Status: {workout.get('status', 'planned').title()}")
-            for e in workout["exercises"]:
-                extra = f" · {e['load_note']}" if e.get("load_note") else ""
-                st.write(f"- **{e['name']}** — {e.get('sets', '')} x {e.get('reps', '')}{extra}")
-            if workout.get("day_notes"):
-                st.caption(workout["day_notes"])
+            render_workout_readonly(client, workout)
 
 
 # ---------- trainer pages ----------
