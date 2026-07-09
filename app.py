@@ -54,6 +54,10 @@ CAL_OPTIONS = {
     "height": 600,
     "headerToolbar": {"left": "prev,next today", "center": "title", "right": ""},
     "editable": False,
+    # Pinned so the clicked grid cell and its serialized ISO date always agree —
+    # without this, dateClick's date.toISOString() converts through the
+    # browser's local timezone and can land on the wrong calendar day.
+    "timeZone": "UTC",
 }
 
 CAL_CSS = """
@@ -292,8 +296,11 @@ def render_slot_row(client, options, prefix, slot):
     st.caption(slot["slot"])
     c1, c2, c3, c4, c5, c6, c7 = st.columns([2.6, 0.8, 0.8, 1.1, 0.9, 1.8, 0.6])
     cur = slot.get("exercise", "")
-    idx = options.index(cur) if cur in options else 0
-    slot["exercise"] = c1.selectbox("Exercise", options, index=idx, key=f"{prefix}_ex")
+    # A saved exercise name that predates the library (or was never in it)
+    # must still show up, not silently blank out and get overwritten on save.
+    row_options = options if (not cur or cur in options) else [cur] + options
+    idx = row_options.index(cur) if cur in row_options else 0
+    slot["exercise"] = c1.selectbox("Exercise", row_options, index=idx, key=f"{prefix}_ex")
     slot["sets"] = c2.number_input("Sets", min_value=0, step=1, value=int(slot.get("sets") or 0),
                                     key=f"{prefix}_sets")
     slot["reps"] = c3.text_input("Reps", value=slot.get("reps", ""), key=f"{prefix}_reps", placeholder="8-10")
