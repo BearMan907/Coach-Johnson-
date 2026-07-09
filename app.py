@@ -133,9 +133,27 @@ def days_since(date_str):
     return (date.today() - d).days
 
 
+def client_options(clients):
+    """(display_label, client_id) pairs. If two clients share a name, a plain
+    name-keyed dict would silently collapse to one of them — disambiguate so
+    every client stays selectable everywhere."""
+    name_counts = {}
+    for c in clients:
+        name_counts[c["name"]] = name_counts.get(c["name"], 0) + 1
+    options = []
+    for c in clients:
+        label = c["name"]
+        if name_counts[c["name"]] > 1:
+            label = f"{c['name']} ({c.get('start_date') or c['id']})"
+        options.append((label, c["id"]))
+    return options
+
+
 def status_flag(client):
-    last_dates = [e["date"] for e in client.get("checkins", [])] + \
-                 [e["date"] for e in client.get("lift_entries", [])]
+    last_dates = [e.get("date", "") for e in client.get("checkins", [])] + \
+                 [e.get("date", "") for e in client.get("lift_entries", [])] + \
+                 [d for d, w in client.get("workouts", {}).items() if w.get("status") == "completed"]
+    last_dates = [d for d in last_dates if d]
     if not last_dates:
         return "New", "\U0001F7E2"
     most_recent = max(last_dates)
@@ -178,22 +196,86 @@ def last_performance(client, exercise_name, before_date=None):
     if not exercise_name:
         return None
     entries = [e for e in client.get("lift_entries", [])
-               if e["exercise"].strip().lower() == exercise_name.strip().lower()]
+               if e.get("exercise", "").strip().lower() == exercise_name.strip().lower()]
     if before_date:
-        entries = [e for e in entries if e["date"] < str(before_date)]
+        entries = [e for e in entries if e.get("date", "") < str(before_date)]
     if not entries:
         return None
-    return max(entries, key=lambda e: e["date"])
+    return max(entries, key=lambda e: e.get("date", ""))
 
 
 def empty_slot(label):
     return {"slot": label, "exercise": "", "sets": 0, "reps": "", "weight": "", "rest_sec": 0, "notes": ""}
 
 
+def normalize_workout(w):
+    """Best-effort upgrade of a saved workout dict from any earlier schema
+    version (e.g. the original flat "exercises" list, or a shape saved before
+    a field like "notes" existed) into the current shape. Every place that
+    reads a workout out of client["workouts"] must go through this — earlier
+    schema versions were missing "warmup"/"blocks"/"finisher" entirely, which
+    caused KeyError crashes (and calendar days silently showing as generic
+    "Workout" instead of a real exercise count) once the current code assumed
+    those keys always exist."""
+    if not w:
+        return None
+    w = copy.deepcopy(w)
+    old_exercises = w.pop("exercises", None)
+
+    w.setdefault("warmup", {})
+    w["warmup"].setdefault("duration_min", 0)
+    w["warmup"].setdefault("notes", "")
+
+    w.setdefault("blocks", [])
+    for b in w["blocks"]:
+        b.setdefault("label", "Block")
+        b.setdefault("slots", [])
+        for s in b["slots"]:
+            s.setdefault("slot", "")
+            s.setdefault("exercise", "")
+            s.setdefault("sets", 0)
+            s.setdefault("reps", "")
+            s.setdefault("weight", "")
+            s.setdefault("rest_sec", 0)
+            s.setdefault("notes", "")
+
+    w.setdefault("finisher", {})
+    w["finisher"].setdefault("slots", [])
+    for s in w["finisher"]["slots"]:
+        s.setdefault("slot", "")
+        s.setdefault("exercise", "")
+        s.setdefault("sets", 0)
+        s.setdefault("reps", "")
+        s.setdefault("weight", "")
+        s.setdefault("rest_sec", 0)
+        s.setdefault("notes", "")
+
+    w.setdefault("status", "planned")
+    w.setdefault("day_notes", "")
+
+    # migrate the original flat "exercises" schema into Block 1 if nothing
+    # newer has already been saved over it
+    if old_exercises and not w["blocks"]:
+        slots = []
+        for i, e in enumerate(old_exercises):
+            slots.append({
+                "slot": slot_label_for(1, i),
+                "exercise": e.get("name", ""),
+                "sets": e.get("sets", 0),
+                "reps": e.get("reps", ""),
+                "weight": e.get("load_note", ""),
+                "rest_sec": 0,
+                "notes": "",
+            })
+        w["blocks"] = [{"label": "Block 1", "slots": slots}]
+
+    return w
+
+
 def get_workout(client, key_date):
     w = client.get("workouts", {}).get(key_date)
     if w:
-        return w
+        return normalize_workout(w)
     return {
         "warmup": {"duration_min": 10, "notes": ""},
         "blocks": [
@@ -239,7 +321,8 @@ def extract_clicked_date(cal_state):
 
 def build_calendar_events(client):
     events = []
-    for d, w in client.get("workouts", {}).items():
+    for d, raw_w in client.get("workouts", {}).items():
+        w = normalize_workout(raw_w)
         wstatus = w.get("status", "planned")
         color = {
             "planned": METRIC_COLOR["weight"],
@@ -398,29 +481,31 @@ def render_workout_editor(client, target_date):
     workout["day_notes"] = st.text_area("Day notes", value=workout.get("day_notes", ""), key=f"daynotes_{base_id}")
 
     all_slots = [s for b in blocks for s in b["slots"]] + fin_slots
-    filled_slots = [s for s in all_slots if s["exercise"]]
+    filled_slots = [s for s in all_slots if s.get("exercise")]
 
     actual_inputs = {}
     if wstatus == "completed" and filled_slots:
         st.info("Log what was actually performed — this feeds the strength chart and next time's reference.")
         for s in filled_slots:
-            c1, c2 = st.columns(2)
+            c1, c2, c3 = st.columns(3)
             aw = c1.number_input(f"Actual weight — {s['slot']} {s['exercise']}", min_value=0.0, step=2.5,
                                   key=f"actual_w_{base_id}_{s['slot']}")
             ar = c2.number_input(f"Actual reps — {s['slot']} {s['exercise']}", min_value=0, step=1,
                                   key=f"actual_r_{base_id}_{s['slot']}")
-            actual_inputs[s["slot"]] = (s["exercise"], aw, ar)
+            arpe = c3.number_input(f"RPE (optional) — {s['slot']} {s['exercise']}", min_value=0.0, max_value=10.0,
+                                    step=0.5, key=f"actual_rpe_{base_id}_{s['slot']}")
+            actual_inputs[s["slot"]] = (s["exercise"], aw, ar, arpe)
 
     if st.button("Save workout", key=f"save_workout_{base_id}"):
         client.setdefault("workouts", {})[key_date] = copy.deepcopy(workout)
-        for slot_label, (ex_name, aw, ar) in actual_inputs.items():
+        for slot_label, (ex_name, aw, ar, arpe) in actual_inputs.items():
             if aw and ar:
                 client.setdefault("lift_entries", []).append({
                     "date": key_date,
                     "exercise": ex_name,
                     "load_lb": aw,
                     "reps": int(ar),
-                    "rpe": None,
+                    "rpe": arpe or None,
                     "est_1rm": epley_1rm(aw, int(ar)),
                 })
         save_client(client)
@@ -495,7 +580,7 @@ def render_readonly_calendar(client):
 
     selected_str = st.session_state.get(state_key)
     if selected_str:
-        workout = client.get("workouts", {}).get(selected_str)
+        workout = normalize_workout(client.get("workouts", {}).get(selected_str))
         selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
         st.markdown(f"**{selected.strftime('%A, %b %d, %Y')}**")
         if not workout or not workout_exercise_count(workout):
@@ -518,22 +603,26 @@ def page_roster():
     rows = []
     for c in clients:
         label, emoji = status_flag(c)
+        session_dates = {e.get("date", "") for e in c.get("lift_entries", [])}
+        session_dates |= {d for d, w in c.get("workouts", {}).items() if w.get("status") == "completed"}
+        session_dates.discard("")
         rows.append({
             "": emoji,
             "Name": c["name"],
             "Primary Goal": c.get("goals", {}).get("primary", ""),
             "Status": label,
-            "Sessions Logged": len(c.get("lift_entries", [])),
+            "Sessions Logged": len(session_dates),
             "Check-ins": len(c.get("checkins", [])),
         })
     df = pd.DataFrame(rows)
     st.dataframe(df, use_container_width=True, hide_index=True)
 
     st.divider()
-    names = {c["name"]: c["id"] for c in clients}
-    picked = st.selectbox("Open a client profile", options=list(names.keys()))
+    options = client_options(clients)
+    labels = [label for label, _ in options]
+    picked = st.selectbox("Open a client profile", options=labels)
     if st.button("Go to profile"):
-        st.session_state["selected_client_id"] = names[picked]
+        st.session_state["selected_client_id"] = dict(options)[picked]
         st.session_state["trainer_nav"] = "Client Workspace"
         st.rerun()
 
@@ -766,11 +855,12 @@ def page_trainer_client():
         st.info("No clients yet. Add one from the sidebar first.")
         return
 
-    names = {c["name"]: c["id"] for c in clients}
+    options = client_options(clients)
+    labels = [label for label, _ in options]
     default_id = st.session_state.get("selected_client_id")
-    default_name = next((n for n, i in names.items() if i == default_id), list(names.keys())[0])
-    picked_name = st.selectbox("Client", options=list(names.keys()), index=list(names.keys()).index(default_name))
-    client_id = names[picked_name]
+    default_label = next((label for label, cid in options if cid == default_id), labels[0])
+    picked_label = st.selectbox("Client", options=labels, index=labels.index(default_label))
+    client_id = dict(options)[picked_label]
     st.session_state["selected_client_id"] = client_id
     client = load_client(client_id)
 
@@ -811,9 +901,10 @@ def page_client_view():
     if not clients:
         st.info("No clients yet.")
         return
-    names = {c["name"]: c["id"] for c in clients}
-    picked_name = st.selectbox("Select client", options=list(names.keys()))
-    client = load_client(names[picked_name])
+    options = client_options(clients)
+    labels = [label for label, _ in options]
+    picked_label = st.selectbox("Select client", options=labels)
+    client = load_client(dict(options)[picked_label])
 
     render_mantra_banner(client)
 
