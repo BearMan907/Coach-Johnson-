@@ -223,6 +223,20 @@ def workout_exercise_count(workout):
     return count
 
 
+def extract_clicked_date(cal_state):
+    """Clicking blank calendar space fires dateClick; clicking directly on an
+    existing event pill fires eventClick instead (and dateClick never fires) —
+    both need to resolve to the same selected date."""
+    if not cal_state:
+        return None
+    cb = cal_state.get("callback")
+    if cb == "dateClick":
+        return cal_state["dateClick"]["date"][:10]
+    if cb == "eventClick":
+        return cal_state["eventClick"]["event"]["start"][:10]
+    return None
+
+
 def build_calendar_events(client):
     events = []
     for d, w in client.get("workouts", {}).items():
@@ -420,9 +434,10 @@ def tab_program_calendar(client):
     events = build_calendar_events(client)
     state_key = f"cal_selected_date_{client['id']}"
     cal_state = calendar(events=events, options=CAL_OPTIONS, custom_css=CAL_CSS,
-                          callbacks=["dateClick"], key=f"trainer_cal_{client['id']}")
-    if cal_state and cal_state.get("callback") == "dateClick":
-        st.session_state[state_key] = cal_state["dateClick"]["date"][:10]
+                          callbacks=["dateClick", "eventClick"], key=f"trainer_cal_{client['id']}")
+    clicked = extract_clicked_date(cal_state)
+    if clicked:
+        st.session_state[state_key] = clicked
 
     selected_str = st.session_state.get(state_key, str(date.today()))
     selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
@@ -473,9 +488,10 @@ def render_readonly_calendar(client):
     events = build_calendar_events(client)
     state_key = f"client_cal_selected_{client['id']}"
     cal_state = calendar(events=events, options=CAL_OPTIONS, custom_css=CAL_CSS,
-                          callbacks=["dateClick"], key=f"client_cal_{client['id']}")
-    if cal_state and cal_state.get("callback") == "dateClick":
-        st.session_state[state_key] = cal_state["dateClick"]["date"][:10]
+                          callbacks=["dateClick", "eventClick"], key=f"client_cal_{client['id']}")
+    clicked = extract_clicked_date(cal_state)
+    if clicked:
+        st.session_state[state_key] = clicked
 
     selected_str = st.session_state.get(state_key)
     if selected_str:
