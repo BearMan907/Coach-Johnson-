@@ -6,13 +6,14 @@ import json
 import re
 import html
 import string
+import copy
 from pathlib import Path
 from datetime import date, datetime
 
 DATA_DIR = Path(__file__).parent / "data" / "clients"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-st.set_page_config(page_title="HotshotHunterCoach Dashboard", layout="wide", page_icon="\U0001F3D4")
+st.set_page_config(page_title="CoachJohnson Dashboard", layout="wide", page_icon="\U0001F3D4")
 
 
 # ---------- palette (dataviz skill, dark-mode validated set) ----------
@@ -182,7 +183,7 @@ def last_performance(client, exercise_name, before_date=None):
 
 
 def empty_slot(label):
-    return {"slot": label, "exercise": "", "sets": 0, "reps": "", "weight": "", "rest_sec": 0}
+    return {"slot": label, "exercise": "", "sets": 0, "reps": "", "weight": "", "rest_sec": 0, "notes": ""}
 
 
 def get_workout(client, key_date):
@@ -200,6 +201,16 @@ def get_workout(client, key_date):
         "status": "planned",
         "day_notes": "",
     }
+
+
+def get_workout_state(client, key_date):
+    """Mutable, session-scoped working copy of a day's workout so add/remove
+    controls can edit block and slot lists in place across reruns without
+    losing in-progress edits until the trainer explicitly saves."""
+    state_key = f"workout_state_{client['id']}_{key_date}"
+    if state_key not in st.session_state:
+        st.session_state[state_key] = copy.deepcopy(get_workout(client, key_date))
+    return st.session_state[state_key]
 
 
 def workout_exercise_count(workout):
@@ -275,98 +286,97 @@ def render_body_charts(client):
 
 # ---------- workout calendar + form ----------
 
-def render_slot_editor(client, prefix, existing_slots, slot_labels, options):
-    rows = []
-    for label in slot_labels:
-        existing = next((s for s in existing_slots if s.get("slot") == label), empty_slot(label))
-        st.markdown(f"**{label}**")
-        c1, c2, c3, c4, c5 = st.columns([3, 1, 1, 1.3, 1])
-        cur = existing.get("exercise", "")
-        idx = options.index(cur) if cur in options else 0
-        exercise = c1.selectbox("Exercise", options, index=idx, key=f"{prefix}_{label}_ex")
-        sets = c2.number_input("Sets", min_value=0, step=1, value=int(existing.get("sets") or 0),
-                                key=f"{prefix}_{label}_sets")
-        reps = c3.text_input("Reps", value=existing.get("reps", ""), key=f"{prefix}_{label}_reps", placeholder="8-10")
-        weight = c4.text_input("Weight", value=existing.get("weight", ""), key=f"{prefix}_{label}_weight",
-                                placeholder="lb or RPE")
-        rest_sec = c5.number_input("Rest (sec)", min_value=0, step=15, value=int(existing.get("rest_sec") or 0),
-                                    key=f"{prefix}_{label}_rest")
-        if exercise:
-            last = last_performance(client, exercise)
-            if last:
-                st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']} (on {last['date']})")
-            else:
-                st.caption("No prior log for this exercise yet.")
-        rows.append({"slot": label, "exercise": exercise, "sets": sets, "reps": reps,
-                     "weight": weight, "rest_sec": rest_sec})
-    return rows
+def render_slot_row(client, options, prefix, slot):
+    """Renders one exercise row, mutating `slot` in place. Returns True if
+    this row's remove button was clicked."""
+    st.caption(slot["slot"])
+    c1, c2, c3, c4, c5, c6, c7 = st.columns([2.6, 0.8, 0.8, 1.1, 0.9, 1.8, 0.6])
+    cur = slot.get("exercise", "")
+    idx = options.index(cur) if cur in options else 0
+    slot["exercise"] = c1.selectbox("Exercise", options, index=idx, key=f"{prefix}_ex")
+    slot["sets"] = c2.number_input("Sets", min_value=0, step=1, value=int(slot.get("sets") or 0),
+                                    key=f"{prefix}_sets")
+    slot["reps"] = c3.text_input("Reps", value=slot.get("reps", ""), key=f"{prefix}_reps", placeholder="8-10")
+    slot["weight"] = c4.text_input("Weight", value=slot.get("weight", ""), key=f"{prefix}_weight",
+                                    placeholder="lb or RPE")
+    slot["rest_sec"] = c5.number_input("Rest sec", min_value=0, step=15, value=int(slot.get("rest_sec") or 0),
+                                        key=f"{prefix}_rest")
+    slot["notes"] = c6.text_input("Notes", value=slot.get("notes", ""), key=f"{prefix}_notes", placeholder="cues")
+    remove_clicked = c7.button("\U0001F5D1", key=f"{prefix}_del", help="Remove this exercise")
+    if slot["exercise"]:
+        last = last_performance(client, slot["exercise"])
+        if last:
+            st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']} (on {last['date']})")
+        else:
+            st.caption("No prior log for this exercise yet.")
+    return remove_clicked
+
+
+def render_slot_list(client, options, prefix, slots, add_label):
+    """Renders every slot in `slots` (mutating in place), handles remove /
+    add-exercise, and returns nothing — `slots` itself is the source of truth."""
+    remove_idx = None
+    for j, slot in enumerate(slots):
+        if render_slot_row(client, options, f"{prefix}_{j}", slot):
+            remove_idx = j
+    if remove_idx is not None:
+        slots.pop(remove_idx)
+        st.rerun()
+    if st.button(add_label, key=f"{prefix}_add"):
+        slots.append(empty_slot(""))
+        st.rerun()
 
 
 def render_workout_editor(client, target_date):
     key_date = str(target_date)
-    workout = get_workout(client, key_date)
+    workout = get_workout_state(client, key_date)
     st.markdown(f"### {target_date.strftime('%A, %b %d, %Y')}")
 
     options = exercise_options()
     base_id = f"{client['id']}_{key_date}"
 
-    nblocks_key = f"nblocks_{base_id}"
-    if nblocks_key not in st.session_state:
-        st.session_state[nblocks_key] = max(len(workout.get("blocks", [])), DEFAULT_BLOCK_COUNT)
-
-    for i in range(st.session_state[nblocks_key]):
-        nslots_key = f"nslots_{base_id}_{i}"
-        if nslots_key not in st.session_state:
-            existing_blocks = workout.get("blocks", [])
-            existing_block = existing_blocks[i] if i < len(existing_blocks) else None
-            st.session_state[nslots_key] = len(existing_block["slots"]) if existing_block else DEFAULT_SLOTS_PER_BLOCK
-
-    nfin_key = f"nfin_{base_id}"
-    if nfin_key not in st.session_state:
-        st.session_state[nfin_key] = max(len(workout.get("finisher", {}).get("slots", [])), DEFAULT_FINISHER_SLOTS)
-
     st.subheader("Warmup / Stretch")
     c1, c2 = st.columns([1, 3])
-    warmup_min = c1.number_input("Duration (min)", min_value=0, step=5,
-                                  value=int(workout.get("warmup", {}).get("duration_min") or 10),
-                                  key=f"warmup_min_{base_id}")
-    warmup_notes = c2.text_input("Notes", value=workout.get("warmup", {}).get("notes", ""),
-                                  key=f"warmup_notes_{base_id}")
+    workout["warmup"]["duration_min"] = c1.number_input(
+        "Duration (min)", min_value=0, step=5,
+        value=int(workout.get("warmup", {}).get("duration_min") or 10), key=f"warmup_min_{base_id}")
+    workout["warmup"]["notes"] = c2.text_input(
+        "Notes", value=workout.get("warmup", {}).get("notes", ""), key=f"warmup_notes_{base_id}")
 
-    new_blocks = []
-    for i in range(st.session_state[nblocks_key]):
+    blocks = workout["blocks"]
+    remove_block_idx = None
+    for i, block in enumerate(blocks):
         block_num = i + 1
-        label = f"Block {block_num}"
-        st.subheader(label)
-        existing_block = next((b for b in workout.get("blocks", []) if b.get("label") == label), {"slots": []})
-        n_slots = st.session_state[f"nslots_{base_id}_{i}"]
-        slot_labels = [slot_label_for(block_num, j) for j in range(n_slots)]
-        block_rows = render_slot_editor(client, f"blk_{base_id}_{label}",
-                                         existing_block.get("slots", []), slot_labels, options)
-        if st.button(f"+ Add exercise to {label}", key=f"addslot_{base_id}_{i}"):
-            st.session_state[f"nslots_{base_id}_{i}"] += 1
-            st.rerun()
-        new_blocks.append({"label": label, "slots": block_rows})
+        block["label"] = f"Block {block_num}"
+        header_col, del_col = st.columns([6, 1])
+        header_col.subheader(block["label"])
+        if del_col.button("\U0001F5D1 Remove block", key=f"delblock_{base_id}_{i}"):
+            remove_block_idx = i
+        for j, slot in enumerate(block["slots"]):
+            slot["slot"] = slot_label_for(block_num, j)
+        render_slot_list(client, options, f"blk_{base_id}_{i}", block["slots"],
+                          add_label=f"+ Add exercise to {block['label']}")
+    if remove_block_idx is not None:
+        blocks.pop(remove_block_idx)
+        st.rerun()
 
     if st.button("+ Add block", key=f"addblock_{base_id}"):
-        st.session_state[nblocks_key] += 1
+        blocks.append({"label": "", "slots": [empty_slot(""), empty_slot("")]})
         st.rerun()
 
     st.subheader("FINISHER")
-    n_fin = st.session_state[nfin_key]
-    finisher_labels = [f"Finisher {slot_letter(j)}" for j in range(n_fin)]
-    finisher_rows = render_slot_editor(client, f"fin_{base_id}",
-                                        workout.get("finisher", {}).get("slots", []), finisher_labels, options)
-    if st.button("+ Add exercise to Finisher", key=f"addfin_{base_id}"):
-        st.session_state[nfin_key] += 1
-        st.rerun()
+    fin_slots = workout["finisher"]["slots"]
+    for j, slot in enumerate(fin_slots):
+        slot["slot"] = f"Finisher {slot_letter(j)}"
+    render_slot_list(client, options, f"fin_{base_id}", fin_slots, add_label="+ Add exercise to Finisher")
 
     wstatus = st.selectbox("Status", ["planned", "completed", "missed"],
                             index=["planned", "completed", "missed"].index(workout.get("status", "planned")),
-                            key=f"wstatus_{client['id']}_{key_date}")
-    day_notes = st.text_area("Day notes", value=workout.get("day_notes", ""), key=f"daynotes_{client['id']}_{key_date}")
+                            key=f"wstatus_{base_id}")
+    workout["status"] = wstatus
+    workout["day_notes"] = st.text_area("Day notes", value=workout.get("day_notes", ""), key=f"daynotes_{base_id}")
 
-    all_slots = [s for b in new_blocks for s in b["slots"]] + finisher_rows
+    all_slots = [s for b in blocks for s in b["slots"]] + fin_slots
     filled_slots = [s for s in all_slots if s["exercise"]]
 
     actual_inputs = {}
@@ -375,19 +385,13 @@ def render_workout_editor(client, target_date):
         for s in filled_slots:
             c1, c2 = st.columns(2)
             aw = c1.number_input(f"Actual weight — {s['slot']} {s['exercise']}", min_value=0.0, step=2.5,
-                                  key=f"actual_w_{client['id']}_{key_date}_{s['slot']}")
+                                  key=f"actual_w_{base_id}_{s['slot']}")
             ar = c2.number_input(f"Actual reps — {s['slot']} {s['exercise']}", min_value=0, step=1,
-                                  key=f"actual_r_{client['id']}_{key_date}_{s['slot']}")
+                                  key=f"actual_r_{base_id}_{s['slot']}")
             actual_inputs[s["slot"]] = (s["exercise"], aw, ar)
 
-    if st.button("Save workout", key=f"save_workout_{client['id']}_{key_date}"):
-        client.setdefault("workouts", {})[key_date] = {
-            "warmup": {"duration_min": warmup_min, "notes": warmup_notes},
-            "blocks": new_blocks,
-            "finisher": {"slots": finisher_rows},
-            "status": wstatus,
-            "day_notes": day_notes,
-        }
+    if st.button("Save workout", key=f"save_workout_{base_id}"):
+        client.setdefault("workouts", {})[key_date] = copy.deepcopy(workout)
         for slot_label, (ex_name, aw, ar) in actual_inputs.items():
             if aw and ar:
                 client.setdefault("lift_entries", []).append({
@@ -435,6 +439,8 @@ def render_workout_readonly(client, workout):
             extra = f" · {s['weight']}" if s.get("weight") else ""
             rest = f" · rest {s['rest_sec']}s" if s.get("rest_sec") else ""
             st.write(f"- {s['slot']}) **{s['exercise']}** — {s.get('sets', '')} x {s.get('reps', '')}{extra}{rest}")
+            if s.get("notes"):
+                st.caption(f"Note: {s['notes']}")
             last = last_performance(client, s["exercise"])
             if last:
                 st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']}")
@@ -445,6 +451,8 @@ def render_workout_readonly(client, workout):
         for s in fin_filled:
             extra = f" · {s['weight']}" if s.get("weight") else ""
             st.write(f"- **{s['exercise']}** — {s.get('sets', '')} x {s.get('reps', '')}{extra}")
+            if s.get("notes"):
+                st.caption(f"Note: {s['notes']}")
             last = last_performance(client, s["exercise"])
             if last:
                 st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']}")
@@ -818,7 +826,7 @@ def page_client_view():
 
 # ---------- nav ----------
 
-st.sidebar.title("\U0001F3D4 HotshotHunterCoach")
+st.sidebar.title("\U0001F3D4 CoachJohnson")
 mode = st.sidebar.radio("Mode", ["Trainer", "Client View"])
 
 if mode == "Trainer":
