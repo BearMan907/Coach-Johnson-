@@ -594,10 +594,17 @@ def render_readonly_calendar(client):
 
 def page_roster():
     st.title("Roster")
-    clients = list_clients()
+    all_clients = list_clients()
+
+    if not all_clients:
+        st.info("No clients yet. Add your first client from the sidebar.")
+        return
+
+    show_inactive = st.checkbox("Show paused/ended clients", value=False)
+    clients = all_clients if show_inactive else [c for c in all_clients if c.get("status", "active") == "active"]
 
     if not clients:
-        st.info("No clients yet. Add your first client from the sidebar.")
+        st.info("No active clients. Check \"Show paused/ended clients\" above to see everyone.")
         return
 
     rows = []
