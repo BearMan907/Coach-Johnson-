@@ -5,6 +5,7 @@ from streamlit_calendar import calendar
 import json
 import re
 import html
+import string
 from pathlib import Path
 from datetime import date, datetime
 
@@ -68,8 +69,17 @@ CAL_CSS = """
 
 EXERCISE_LIBRARY_PATH = Path(__file__).parent / "data" / "exercise_library.json"
 
-BLOCK_SPEC = [("Block 1", ["1A", "1B", "1C"]), ("Block 2", ["2A", "2B"])]
-FINISHER_SLOTS = ["Finisher A", "Finisher B"]
+DEFAULT_BLOCK_COUNT = 3
+DEFAULT_SLOTS_PER_BLOCK = 2
+DEFAULT_FINISHER_SLOTS = 2
+
+
+def slot_letter(idx):
+    return string.ascii_uppercase[idx] if idx < 26 else str(idx + 1)
+
+
+def slot_label_for(block_num, idx):
+    return f"{block_num}{slot_letter(idx)}"
 
 
 # ---------- storage ----------
@@ -181,8 +191,12 @@ def get_workout(client, key_date):
         return w
     return {
         "warmup": {"duration_min": 10, "notes": ""},
-        "blocks": [{"label": label, "slots": [empty_slot(s) for s in slots]} for label, slots in BLOCK_SPEC],
-        "finisher": {"slots": [empty_slot(s) for s in FINISHER_SLOTS]},
+        "blocks": [
+            {"label": f"Block {i + 1}",
+             "slots": [empty_slot(slot_label_for(i + 1, j)) for j in range(DEFAULT_SLOTS_PER_BLOCK)]}
+            for i in range(DEFAULT_BLOCK_COUNT)
+        ],
+        "finisher": {"slots": [empty_slot(f"Finisher {slot_letter(j)}") for j in range(DEFAULT_FINISHER_SLOTS)]},
         "status": "planned",
         "day_notes": "",
     }
@@ -294,26 +308,58 @@ def render_workout_editor(client, target_date):
     st.markdown(f"### {target_date.strftime('%A, %b %d, %Y')}")
 
     options = exercise_options()
+    base_id = f"{client['id']}_{key_date}"
+
+    nblocks_key = f"nblocks_{base_id}"
+    if nblocks_key not in st.session_state:
+        st.session_state[nblocks_key] = max(len(workout.get("blocks", [])), DEFAULT_BLOCK_COUNT)
+
+    for i in range(st.session_state[nblocks_key]):
+        nslots_key = f"nslots_{base_id}_{i}"
+        if nslots_key not in st.session_state:
+            existing_blocks = workout.get("blocks", [])
+            existing_block = existing_blocks[i] if i < len(existing_blocks) else None
+            st.session_state[nslots_key] = len(existing_block["slots"]) if existing_block else DEFAULT_SLOTS_PER_BLOCK
+
+    nfin_key = f"nfin_{base_id}"
+    if nfin_key not in st.session_state:
+        st.session_state[nfin_key] = max(len(workout.get("finisher", {}).get("slots", [])), DEFAULT_FINISHER_SLOTS)
 
     st.subheader("Warmup / Stretch")
     c1, c2 = st.columns([1, 3])
     warmup_min = c1.number_input("Duration (min)", min_value=0, step=5,
                                   value=int(workout.get("warmup", {}).get("duration_min") or 10),
-                                  key=f"warmup_min_{client['id']}_{key_date}")
+                                  key=f"warmup_min_{base_id}")
     warmup_notes = c2.text_input("Notes", value=workout.get("warmup", {}).get("notes", ""),
-                                  key=f"warmup_notes_{client['id']}_{key_date}")
+                                  key=f"warmup_notes_{base_id}")
 
     new_blocks = []
-    for label, slot_labels in BLOCK_SPEC:
+    for i in range(st.session_state[nblocks_key]):
+        block_num = i + 1
+        label = f"Block {block_num}"
         st.subheader(label)
         existing_block = next((b for b in workout.get("blocks", []) if b.get("label") == label), {"slots": []})
-        block_rows = render_slot_editor(client, f"blk_{client['id']}_{key_date}_{label}",
+        n_slots = st.session_state[f"nslots_{base_id}_{i}"]
+        slot_labels = [slot_label_for(block_num, j) for j in range(n_slots)]
+        block_rows = render_slot_editor(client, f"blk_{base_id}_{label}",
                                          existing_block.get("slots", []), slot_labels, options)
+        if st.button(f"+ Add exercise to {label}", key=f"addslot_{base_id}_{i}"):
+            st.session_state[f"nslots_{base_id}_{i}"] += 1
+            st.rerun()
         new_blocks.append({"label": label, "slots": block_rows})
 
+    if st.button("+ Add block", key=f"addblock_{base_id}"):
+        st.session_state[nblocks_key] += 1
+        st.rerun()
+
     st.subheader("FINISHER")
-    finisher_rows = render_slot_editor(client, f"fin_{client['id']}_{key_date}",
-                                        workout.get("finisher", {}).get("slots", []), FINISHER_SLOTS, options)
+    n_fin = st.session_state[nfin_key]
+    finisher_labels = [f"Finisher {slot_letter(j)}" for j in range(n_fin)]
+    finisher_rows = render_slot_editor(client, f"fin_{base_id}",
+                                        workout.get("finisher", {}).get("slots", []), finisher_labels, options)
+    if st.button("+ Add exercise to Finisher", key=f"addfin_{base_id}"):
+        st.session_state[nfin_key] += 1
+        st.rerun()
 
     wstatus = st.selectbox("Status", ["planned", "completed", "missed"],
                             index=["planned", "completed", "missed"].index(workout.get("status", "planned")),
