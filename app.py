@@ -425,10 +425,10 @@ def render_body_charts(client):
             latest = mdf.iloc[-1][col]
             st.metric(label, f"{latest:g}")
             fig = interactive_line_chart(mdf, "date", col, color, label)
-            st.plotly_chart(fig, use_container_width=True, key=f"chart_{client['id']}_{col}")
+            st.plotly_chart(fig, width='stretch', key=f"chart_{client['id']}_{col}")
 
     with st.expander("Raw check-in data"):
-        st.dataframe(df.sort_values("date", ascending=False), use_container_width=True, hide_index=True)
+        st.dataframe(df.sort_values("date", ascending=False), width='stretch', hide_index=True)
 
 
 # ---------- workout calendar + form ----------
@@ -773,7 +773,7 @@ def page_roster():
             "Check-ins": len(c.get("checkins", [])),
         })
     df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width='stretch', hide_index=True)
 
     st.divider()
     options = client_options(clients)
@@ -981,9 +981,9 @@ def tab_strength(client):
 
     st.metric("Best estimated 1RM", f"{edf['est_1rm'].max()} lb")
     fig = interactive_line_chart(edf, "date", "est_1rm", METRIC_COLOR["strength"], "Estimated 1RM (lb)")
-    st.plotly_chart(fig, use_container_width=True, key=f"strength_chart_{client['id']}_{picked}")
+    st.plotly_chart(fig, width='stretch', key=f"strength_chart_{client['id']}_{picked}")
     st.dataframe(edf[["date", "load_lb", "reps", "rpe", "est_1rm"]].sort_values("date", ascending=False),
-                 use_container_width=True, hide_index=True)
+                 width='stretch', hide_index=True)
 
 
 def tab_milestones(client):
