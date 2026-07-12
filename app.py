@@ -602,9 +602,21 @@ def render_workout_editor(client, target_date):
 
 def tab_program_calendar(client):
     st.subheader("Program Calendar")
-    st.caption("Click a day to add or edit that day's workout.")
+    st.caption("Click a day on the calendar, or pick a date directly below, to add or edit that day's workout.")
     events = build_calendar_events(client)
     state_key = f"cal_selected_date_{client['id']}"
+
+    selected_str = st.session_state.get(state_key, str(date.today()))
+    selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
+
+    # A plain, always-reliable date picker — doesn't depend on the calendar
+    # widget rendering correctly, and is the only way to jump to a date far
+    # outside the calendar's currently-displayed month.
+    picked_date = st.date_input("Jump to a specific date", value=selected, key=f"jumpdate_{client['id']}")
+    if str(picked_date) != selected_str:
+        st.session_state[state_key] = str(picked_date)
+        st.rerun()
+
     cal_state = calendar(events=events, options=CAL_OPTIONS, custom_css=CAL_CSS,
                           callbacks=["dateClick", "eventClick"], key=f"trainer_cal_{client['id']}")
     clicked = extract_clicked_date(cal_state)
