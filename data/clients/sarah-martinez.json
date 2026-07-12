@@ -1,0 +1,260 @@
+{
+  "id": "sarah-martinez",
+  "name": "Sarah Martinez",
+  "start_date": "2026-05-10",
+  "contact": {
+    "phone": "555-0198",
+    "email": "sarah.martinez@example.com"
+  },
+  "goals": {
+    "primary": "Deadlift 2x bodyweight",
+    "why": "Competed in a rec-league strongman event and got hooked"
+  },
+  "mantra": "Strong is the new skinny.",
+  "health_flags": {
+    "injuries": []
+  },
+  "baseline": {
+    "date": "2026-05-10",
+    "weight_lb": 148,
+    "waist_in": 29
+  },
+  "checkins": [
+    {
+      "date": "2026-06-10",
+      "weight_lb": 150,
+      "waist_in": 28.5,
+      "vo2_max": 41.0,
+      "body_fat_pct": 22.0,
+      "skeletal_muscle_lb": 58.5,
+      "bmi": 22.9,
+      "visceral_fat_level": 4,
+      "body_water_pct": 58.5,
+      "bmr": 1490,
+      "notes": "Strength climbing fast, appetite way up."
+    },
+    {
+      "date": "2026-07-05",
+      "weight_lb": 152,
+      "waist_in": 28.5,
+      "vo2_max": 42.5,
+      "body_fat_pct": 21.2,
+      "skeletal_muscle_lb": 60.0,
+      "bmi": 23.3,
+      "visceral_fat_level": 4,
+      "body_water_pct": 59.0,
+      "bmr": 1510,
+      "notes": "Feeling powerful. Sleep is the limiting factor now."
+    }
+  ],
+  "lift_entries": [
+    {
+      "date": "2026-05-10",
+      "exercise": "Conventional Deadlift",
+      "load_lb": 135,
+      "reps": 5,
+      "rpe": 6,
+      "est_1rm": 157.5
+    },
+    {
+      "date": "2026-06-10",
+      "exercise": "Conventional Deadlift",
+      "load_lb": 185,
+      "reps": 5,
+      "rpe": 7,
+      "est_1rm": 215.8
+    },
+    {
+      "date": "2026-07-05",
+      "exercise": "Conventional Deadlift",
+      "load_lb": 225,
+      "reps": 3,
+      "rpe": 8,
+      "est_1rm": 247.5
+    },
+    {
+      "date": "2026-05-10",
+      "exercise": "Back Squat",
+      "load_lb": 95,
+      "reps": 5,
+      "rpe": 6,
+      "est_1rm": 110.8
+    },
+    {
+      "date": "2026-06-10",
+      "exercise": "Back Squat",
+      "load_lb": 135,
+      "reps": 5,
+      "rpe": 7,
+      "est_1rm": 157.5
+    },
+    {
+      "date": "2026-07-05",
+      "exercise": "Back Squat",
+      "load_lb": 165,
+      "reps": 5,
+      "rpe": 8,
+      "est_1rm": 192.5
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2026-05-10",
+      "description": "First session"
+    },
+    {
+      "date": "2026-06-20",
+      "description": "First 200lb deadlift"
+    },
+    {
+      "date": "2026-07-05",
+      "description": "225lb deadlift \u2014 1.5x bodyweight"
+    }
+  ],
+  "workouts": {
+    "2026-07-10": {
+      "warmup": {
+        "duration_min": 10,
+        "notes": "Hip mobility + banded walks"
+      },
+      "blocks": [
+        {
+          "label": "Block 1",
+          "slots": [
+            {
+              "slot": "1A",
+              "exercise": "Conventional Deadlift",
+              "sets": 5,
+              "reps": "3",
+              "weight": "225lb",
+              "rest_sec": 180,
+              "notes": "Reset each rep"
+            }
+          ]
+        },
+        {
+          "label": "Block 2",
+          "slots": [
+            {
+              "slot": "2A",
+              "exercise": "Back Squat",
+              "sets": 4,
+              "reps": "5",
+              "weight": "165lb",
+              "rest_sec": 150,
+              "notes": ""
+            },
+            {
+              "slot": "2B",
+              "exercise": "Pull-Up",
+              "sets": 4,
+              "reps": "6-8",
+              "weight": "bodyweight",
+              "rest_sec": 90,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "label": "Block 3",
+          "slots": [
+            {
+              "slot": "3A",
+              "exercise": "Barbell Row",
+              "sets": 3,
+              "reps": "8",
+              "weight": "95lb",
+              "rest_sec": 90,
+              "notes": ""
+            }
+          ]
+        }
+      ],
+      "finisher": {
+        "slots": [
+          {
+            "slot": "Finisher A",
+            "exercise": "Farmer's Carry",
+            "sets": 3,
+            "reps": "40yd",
+            "weight": "60lb/hand",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      },
+      "status": "completed",
+      "day_notes": "PR day. Form stayed tight through all 5 triples."
+    },
+    "2026-07-14": {
+      "warmup": {
+        "duration_min": 10,
+        "notes": ""
+      },
+      "blocks": [
+        {
+          "label": "Block 1",
+          "slots": [
+            {
+              "slot": "1A",
+              "exercise": "Back Squat",
+              "sets": 5,
+              "reps": "5",
+              "weight": "170lb",
+              "rest_sec": 150,
+              "notes": ""
+            },
+            {
+              "slot": "1B",
+              "exercise": "Overhead Press",
+              "sets": 4,
+              "reps": "6",
+              "weight": "65lb",
+              "rest_sec": 90,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "label": "Block 2",
+          "slots": [
+            {
+              "slot": "2A",
+              "exercise": "Chin-Up",
+              "sets": 4,
+              "reps": "6-8",
+              "weight": "bodyweight",
+              "rest_sec": 90,
+              "notes": ""
+            },
+            {
+              "slot": "2B",
+              "exercise": "Hip Thrust",
+              "sets": 3,
+              "reps": "10",
+              "weight": "135lb",
+              "rest_sec": 90,
+              "notes": ""
+            }
+          ]
+        }
+      ],
+      "finisher": {
+        "slots": [
+          {
+            "slot": "Finisher A",
+            "exercise": "Sled Push",
+            "sets": 4,
+            "reps": "20yd",
+            "weight": "moderate",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      },
+      "status": "planned",
+      "day_notes": ""
+    }
+  },
+  "status": "active"
+}

@@ -1,0 +1,215 @@
+{
+  "id": "marcus-chen",
+  "name": "Marcus Chen",
+  "start_date": "2026-04-20",
+  "contact": {
+    "phone": "555-0176",
+    "email": "marcus.chen@example.com"
+  },
+  "goals": {
+    "primary": "Improve VO2 max and overall conditioning for rec soccer league",
+    "why": "Gassing out in the third period of every match, wants to outlast guys half his age"
+  },
+  "mantra": "Outwork yesterday.",
+  "health_flags": {
+    "injuries": [
+      "prior right ankle sprain \u2014 cleared, monitor lateral movement"
+    ]
+  },
+  "baseline": {
+    "date": "2026-04-20",
+    "weight_lb": 178,
+    "waist_in": 33
+  },
+  "checkins": [
+    {
+      "date": "2026-05-20",
+      "weight_lb": 176,
+      "waist_in": 32.5,
+      "vo2_max": 38.0,
+      "body_fat_pct": 19.0,
+      "skeletal_muscle_lb": 74.0,
+      "bmi": 25.5,
+      "visceral_fat_level": 7,
+      "body_water_pct": 57.0,
+      "bmr": 1720,
+      "notes": "Noticeably less winded in pickup games."
+    },
+    {
+      "date": "2026-06-25",
+      "weight_lb": 174,
+      "waist_in": 31.5,
+      "vo2_max": 41.5,
+      "body_fat_pct": 17.5,
+      "skeletal_muscle_lb": 75.5,
+      "bmi": 25.1,
+      "visceral_fat_level": 6,
+      "body_water_pct": 58.0,
+      "bmr": 1750,
+      "notes": "Best game of the season Sunday \u2014 no cramping."
+    }
+  ],
+  "lift_entries": [
+    {
+      "date": "2026-04-20",
+      "exercise": "Front Squat",
+      "load_lb": 95,
+      "reps": 6,
+      "rpe": 6,
+      "est_1rm": 114.0
+    },
+    {
+      "date": "2026-05-20",
+      "exercise": "Front Squat",
+      "load_lb": 115,
+      "reps": 6,
+      "rpe": 7,
+      "est_1rm": 138.0
+    },
+    {
+      "date": "2026-06-25",
+      "exercise": "Front Squat",
+      "load_lb": 135,
+      "reps": 5,
+      "rpe": 7,
+      "est_1rm": 157.5
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2026-04-20",
+      "description": "First session"
+    },
+    {
+      "date": "2026-05-25",
+      "description": "VO2 max up 3.5 points in one month"
+    },
+    {
+      "date": "2026-06-28",
+      "description": "Played a full 90 minutes without subbing off"
+    }
+  ],
+  "workouts": {
+    "2026-07-09": {
+      "warmup": {
+        "duration_min": 8,
+        "notes": "High knees, lateral shuffles \u2014 ease into ankle"
+      },
+      "blocks": [
+        {
+          "label": "Block 1",
+          "slots": [
+            {
+              "slot": "1A",
+              "exercise": "Front Squat",
+              "sets": 4,
+              "reps": "5",
+              "weight": "135lb",
+              "rest_sec": 120,
+              "notes": ""
+            },
+            {
+              "slot": "1B",
+              "exercise": "Box Jump",
+              "sets": 4,
+              "reps": "5",
+              "weight": "24in box",
+              "rest_sec": 90,
+              "notes": "Land soft, watch the ankle"
+            }
+          ]
+        },
+        {
+          "label": "Block 2",
+          "slots": [
+            {
+              "slot": "2A",
+              "exercise": "Kettlebell Swing",
+              "sets": 4,
+              "reps": "15",
+              "weight": "44lb",
+              "rest_sec": 60,
+              "notes": ""
+            }
+          ]
+        }
+      ],
+      "finisher": {
+        "slots": [
+          {
+            "slot": "Finisher A",
+            "exercise": "Assault Bike",
+            "sets": 1,
+            "reps": "8 x 20s sprint / 40s rest",
+            "weight": "",
+            "rest_sec": 0,
+            "notes": ""
+          }
+        ]
+      },
+      "status": "completed",
+      "day_notes": "Conditioning block felt brutal but strong finish."
+    },
+    "2026-07-13": {
+      "warmup": {
+        "duration_min": 8,
+        "notes": ""
+      },
+      "blocks": [
+        {
+          "label": "Block 1",
+          "slots": [
+            {
+              "slot": "1A",
+              "exercise": "Front Squat",
+              "sets": 4,
+              "reps": "5",
+              "weight": "140lb",
+              "rest_sec": 120,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "label": "Block 2",
+          "slots": [
+            {
+              "slot": "2A",
+              "exercise": "Lateral Lunge",
+              "sets": 3,
+              "reps": "10/side",
+              "weight": "bodyweight",
+              "rest_sec": 60,
+              "notes": "Ankle check-in"
+            },
+            {
+              "slot": "2B",
+              "exercise": "Med Ball Slam",
+              "sets": 3,
+              "reps": "12",
+              "weight": "20lb",
+              "rest_sec": 45,
+              "notes": ""
+            }
+          ]
+        }
+      ],
+      "finisher": {
+        "slots": [
+          {
+            "slot": "Finisher A",
+            "exercise": "Rowing Machine",
+            "sets": 1,
+            "reps": "6 x 250m sprint",
+            "weight": "",
+            "rest_sec": 0,
+            "notes": ""
+          }
+        ]
+      },
+      "status": "planned",
+      "day_notes": ""
+    }
+  },
+  "status": "active"
+}

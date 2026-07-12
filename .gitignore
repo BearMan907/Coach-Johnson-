@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .streamlit/secrets.toml
 data/clients/*.json
+# Exceptions: jake-thompson.json, sarah-martinez.json, marcus-chen.json are
+# intentionally tracked fake/seed data (force-added) so there's always
+# something to click around, surviving redeploys. Never force-add real
+# client data here.

@@ -1,0 +1,259 @@
+{
+  "id": "jake-thompson",
+  "name": "Jake Thompson",
+  "start_date": "2026-06-01",
+  "contact": {
+    "phone": "555-0142",
+    "email": "jake.thompson@example.com"
+  },
+  "goals": {
+    "primary": "Lose 20 lbs and build a sustainable routine",
+    "why": "Wants to keep up with his kids and feel confident again"
+  },
+  "mantra": "Progress, not perfection.",
+  "health_flags": {
+    "injuries": [
+      "mild left knee soreness \u2014 avoid deep lunges"
+    ]
+  },
+  "baseline": {
+    "date": "2026-06-01",
+    "weight_lb": 215,
+    "waist_in": 40
+  },
+  "checkins": [
+    {
+      "date": "2026-06-15",
+      "weight_lb": 211,
+      "waist_in": 39,
+      "vo2_max": 32.0,
+      "body_fat_pct": 27.5,
+      "skeletal_muscle_lb": 68.0,
+      "bmi": 30.1,
+      "visceral_fat_level": 13,
+      "body_water_pct": 54.0,
+      "bmr": 1820,
+      "notes": "Energy up, sleeping better."
+    },
+    {
+      "date": "2026-07-01",
+      "weight_lb": 207,
+      "waist_in": 37.5,
+      "vo2_max": 33.8,
+      "body_fat_pct": 25.9,
+      "skeletal_muscle_lb": 69.0,
+      "bmi": 29.0,
+      "visceral_fat_level": 11,
+      "body_water_pct": 55.0,
+      "bmr": 1845,
+      "notes": "First time under 210 in 3 years."
+    }
+  ],
+  "lift_entries": [
+    {
+      "date": "2026-06-01",
+      "exercise": "Goblet Squat",
+      "load_lb": 35,
+      "reps": 10,
+      "rpe": 6,
+      "est_1rm": 46.7
+    },
+    {
+      "date": "2026-06-15",
+      "exercise": "Goblet Squat",
+      "load_lb": 45,
+      "reps": 10,
+      "rpe": 7,
+      "est_1rm": 60.0
+    },
+    {
+      "date": "2026-07-01",
+      "exercise": "Goblet Squat",
+      "load_lb": 50,
+      "reps": 8,
+      "rpe": 7,
+      "est_1rm": 63.3
+    },
+    {
+      "date": "2026-06-01",
+      "exercise": "Barbell Bench Press",
+      "load_lb": 95,
+      "reps": 8,
+      "rpe": 6,
+      "est_1rm": 120.3
+    },
+    {
+      "date": "2026-07-01",
+      "exercise": "Barbell Bench Press",
+      "load_lb": 115,
+      "reps": 8,
+      "rpe": 7,
+      "est_1rm": 145.7
+    }
+  ],
+  "milestones": [
+    {
+      "date": "2026-06-01",
+      "description": "First session"
+    },
+    {
+      "date": "2026-07-01",
+      "description": "Broke 210 lbs \u2014 down 8 lbs since day one"
+    }
+  ],
+  "workouts": {
+    "2026-07-08": {
+      "warmup": {
+        "duration_min": 10,
+        "notes": "Bike + dynamic stretching"
+      },
+      "blocks": [
+        {
+          "label": "Block 1",
+          "slots": [
+            {
+              "slot": "1A",
+              "exercise": "Goblet Squat",
+              "sets": 3,
+              "reps": "8-10",
+              "weight": "50lb",
+              "rest_sec": 90,
+              "notes": "Watch the left knee tracking"
+            },
+            {
+              "slot": "1B",
+              "exercise": "Barbell Bench Press",
+              "sets": 3,
+              "reps": "8",
+              "weight": "115lb",
+              "rest_sec": 90,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "label": "Block 2",
+          "slots": [
+            {
+              "slot": "2A",
+              "exercise": "Dumbbell Row",
+              "sets": 3,
+              "reps": "10",
+              "weight": "35lb",
+              "rest_sec": 60,
+              "notes": ""
+            },
+            {
+              "slot": "2B",
+              "exercise": "Plank",
+              "sets": 3,
+              "reps": "45s",
+              "weight": "",
+              "rest_sec": 45,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "label": "Block 3",
+          "slots": [
+            {
+              "slot": "3A",
+              "exercise": "",
+              "sets": 0,
+              "reps": "",
+              "weight": "",
+              "rest_sec": 0,
+              "notes": ""
+            }
+          ]
+        }
+      ],
+      "finisher": {
+        "slots": [
+          {
+            "slot": "Finisher A",
+            "exercise": "Rowing Machine",
+            "sets": 1,
+            "reps": "10 min easy",
+            "weight": "",
+            "rest_sec": 0,
+            "notes": ""
+          }
+        ]
+      },
+      "status": "completed",
+      "day_notes": "Solid session, good energy."
+    },
+    "2026-07-13": {
+      "warmup": {
+        "duration_min": 10,
+        "notes": ""
+      },
+      "blocks": [
+        {
+          "label": "Block 1",
+          "slots": [
+            {
+              "slot": "1A",
+              "exercise": "Goblet Squat",
+              "sets": 3,
+              "reps": "8-10",
+              "weight": "55lb",
+              "rest_sec": 90,
+              "notes": ""
+            },
+            {
+              "slot": "1B",
+              "exercise": "Barbell Bench Press",
+              "sets": 3,
+              "reps": "8",
+              "weight": "120lb",
+              "rest_sec": 90,
+              "notes": ""
+            }
+          ]
+        },
+        {
+          "label": "Block 2",
+          "slots": [
+            {
+              "slot": "2A",
+              "exercise": "Dumbbell Row",
+              "sets": 3,
+              "reps": "10",
+              "weight": "40lb",
+              "rest_sec": 60,
+              "notes": ""
+            },
+            {
+              "slot": "2B",
+              "exercise": "Plank",
+              "sets": 3,
+              "reps": "50s",
+              "weight": "",
+              "rest_sec": 45,
+              "notes": ""
+            }
+          ]
+        }
+      ],
+      "finisher": {
+        "slots": [
+          {
+            "slot": "Finisher A",
+            "exercise": "Rowing Machine",
+            "sets": 1,
+            "reps": "12 min easy",
+            "weight": "",
+            "rest_sec": 0,
+            "notes": ""
+          }
+        ]
+      },
+      "status": "planned",
+      "day_notes": ""
+    }
+  },
+  "status": "active"
+}
