@@ -9,9 +9,11 @@
   {"name": "Leg Press", "pattern": "Squat", "muscle_group": "Quads"},
   {"name": "Walking Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
   {"name": "Reverse Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
+  {"name": "Landmine Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
   {"name": "Lateral Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
   {"name": "Step-Up", "pattern": "Lunge", "muscle_group": "Quads"},
   {"name": "Leg Extension", "pattern": "Squat", "muscle_group": "Quads"},
+  {"name": "Bodyweight Squat", "pattern": "Squat", "muscle_group": "Quads"},
   {"name": "Landmine Squat", "pattern": "Squat", "muscle_group": "Quads"},
 
   {"name": "Conventional Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
@@ -23,6 +25,7 @@
   {"name": "Hip Thrust", "pattern": "Hinge", "muscle_group": "Glutes"},
   {"name": "Glute Bridge", "pattern": "Hinge", "muscle_group": "Glutes"},
   {"name": "Kettlebell Swing", "pattern": "Hinge", "muscle_group": "Glutes"},
+  {"name": "KB Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
   {"name": "Cable Pull-Through", "pattern": "Hinge", "muscle_group": "Glutes"},
   {"name": "Lying Leg Curl", "pattern": "Hinge", "muscle_group": "Hamstrings"},
   {"name": "Seated Leg Curl", "pattern": "Hinge", "muscle_group": "Hamstrings"},
@@ -32,6 +35,7 @@
   {"name": "Incline Barbell Bench Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
   {"name": "Incline Dumbbell Bench Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
   {"name": "Push-Up", "pattern": "Push Horizontal", "muscle_group": "Chest"},
+  {"name": "KB Floor Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
   {"name": "Cable Chest Fly", "pattern": "Push Horizontal", "muscle_group": "Chest"},
   {"name": "Machine Chest Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
   {"name": "Dip", "pattern": "Push Horizontal", "muscle_group": "Chest"},
@@ -86,6 +90,8 @@
   {"name": "Russian Twist", "pattern": "Core", "muscle_group": "Core"},
   {"name": "Dead Bug", "pattern": "Core", "muscle_group": "Core"},
   {"name": "Pallof Press", "pattern": "Core", "muscle_group": "Core"},
+  {"name": "KB Halo", "pattern": "Core", "muscle_group": "Shoulders"},
+  {"name": "KB Pull-Unders", "pattern": "Core", "muscle_group": "Full Body"},
   {"name": "Landmine Rotation", "pattern": "Core", "muscle_group": "Core"},
   {"name": "V-Up", "pattern": "Core", "muscle_group": "Core"},
   {"name": "Bicycle Crunch", "pattern": "Core", "muscle_group": "Core"},
@@ -122,5 +128,7 @@
   {"name": "Walking Knee Hug", "pattern": "Mobility", "muscle_group": "Glutes"},
   {"name": "Inchworm", "pattern": "Mobility", "muscle_group": "Full Body"},
   {"name": "Bird Dog", "pattern": "Mobility", "muscle_group": "Core"},
-  {"name": "90/90 Hip Stretch", "pattern": "Mobility", "muscle_group": "Glutes"}
+  {"name": "90/90 Hip Stretch", "pattern": "Mobility", "muscle_group": "Glutes"},
+  {"name": "90/90 Hip Switches", "pattern": "Mobility", "muscle_group": "Glutes"},
+  {"name": "Thoracic Open Books", "pattern": "Mobility", "muscle_group": "Core"}
 ]

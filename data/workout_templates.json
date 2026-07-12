@@ -376,5 +376,305 @@
     },
     "day_notes": "Keep rest short throughout \u2014 this is meant to be uncomfortable.",
     "id": "conditioning-metabolic-circuit"
+  },
+  {
+    "name": "Day 1 \u2014 Hinge + Pull (Landmine/KB)",
+    "category": "Landmine/Kettlebell",
+    "warmup": {
+      "duration_min": 9,
+      "notes": "Cat-Cow x10 \u00b7 90/90 Hip Switches x8/side \u00b7 Thoracic Open Books x8/side \u00b7 Dynamic Reverse Lunge x10/leg \u00b7 Bodyweight Squat x10 (repeat lunge+squat circuit 2 rounds) \u00b7 Push-Up x25"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "notes": "Alternate 1A/2A, rest 60-90s, 3 rounds",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "KB Deadlift",
+            "sets": 3,
+            "reps": "12-15",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": "Elevated off blocks Wk 1 \u2014 unloaded hinge test first"
+          },
+          {
+            "slot": "2A",
+            "exercise": "Landmine Row",
+            "sets": 3,
+            "reps": "12-15/side",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": "Single-arm"
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "notes": "Alternate 1B/2B, rest 60-90s, 3 rounds \u00b7 Between blocks: 25 Push-Ups (elevate hands if the shoulder talks)",
+        "slots": [
+          {
+            "slot": "1B",
+            "exercise": "Goblet Squat",
+            "sets": 3,
+            "reps": "12-15",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": "To box; bodyweight only Wk 1 if any doubt"
+          },
+          {
+            "slot": "2B",
+            "exercise": "Suitcase Carry",
+            "sets": 3,
+            "reps": "20 yd/side",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Keep Climbing Block",
+        "notes": "Superset, rest 30-45s, if time allows \u00b7 Between blocks: 25 Push-Ups (elevate hands if the shoulder talks)",
+        "slots": [
+          {
+            "slot": "1C",
+            "exercise": "Hammer Curl",
+            "sets": 2,
+            "reps": "15-20",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": ""
+          },
+          {
+            "slot": "2C",
+            "exercise": "Face Pull",
+            "sets": 2,
+            "reps": "15-20",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": "Light \u2014 great for the shoulder"
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Sled Sprint",
+          "sets": 3,
+          "reps": "30 sec intervals",
+          "weight": "controlled march/drive pace",
+          "rest_sec": 60,
+          "notes": "Rest ~60s between intervals. Smooth, powerful strides \u2014 controlled march/drive pace, not an all-out sprint during this block."
+        }
+      ]
+    },
+    "day_notes": "3-day Landmine/Kettlebell block \u2014 Day 1 of 3. Target rep range 12-15.",
+    "id": "day-1-hinge-pull-landmine-kb"
+  },
+  {
+    "name": "Day 2 \u2014 Push + Core (Landmine/KB)",
+    "category": "Landmine/Kettlebell",
+    "warmup": {
+      "duration_min": 9,
+      "notes": "Cat-Cow x10 \u00b7 90/90 Hip Switches x8/side \u00b7 Thoracic Open Books x8/side \u00b7 Dynamic Reverse Lunge x10/leg \u00b7 Bodyweight Squat x10 (repeat lunge+squat circuit 2 rounds) \u00b7 Push-Up x25"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "notes": "Alternate 1A/2A, rest 60-90s",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "Landmine Press",
+            "sets": 4,
+            "reps": "10-12/side",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": "Half-kneeling"
+          },
+          {
+            "slot": "2A",
+            "exercise": "KB Floor Press",
+            "sets": 3,
+            "reps": "10-12",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": "Or Landmine Chest Press"
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "notes": "Cycle 1B/2B/3B, rest 60s, 3 rounds \u00b7 Between blocks: 25 Push-Ups (elevate hands if the shoulder talks)",
+        "slots": [
+          {
+            "slot": "1B",
+            "exercise": "Pallof Press",
+            "sets": 3,
+            "reps": "10-12/side",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": "Tall-kneeling"
+          },
+          {
+            "slot": "2B",
+            "exercise": "KB Halo",
+            "sets": 3,
+            "reps": "10-12/direction",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          },
+          {
+            "slot": "3B",
+            "exercise": "Farmer's Carry",
+            "sets": 3,
+            "reps": "30 yd",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Keep Climbing Block",
+        "notes": "Superset, rest 30-45s, if time allows \u00b7 Between blocks: 25 Push-Ups (elevate hands if the shoulder talks)",
+        "slots": [
+          {
+            "slot": "1C",
+            "exercise": "Cable Chest Fly",
+            "sets": 2,
+            "reps": "15-20",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": "Handles mid-height, comfortable range"
+          },
+          {
+            "slot": "2C",
+            "exercise": "Tricep Pushdown",
+            "sets": 2,
+            "reps": "15-20",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": "Rope attachment"
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Sled Sprint",
+          "sets": 3,
+          "reps": "30 sec intervals",
+          "weight": "controlled march/drive pace",
+          "rest_sec": 60,
+          "notes": "Rest ~60s between intervals. Smooth, powerful strides \u2014 controlled march/drive pace, not an all-out sprint during this block."
+        }
+      ]
+    },
+    "day_notes": "3-day Landmine/Kettlebell block \u2014 Day 2 of 3. Target rep range 10-12.",
+    "id": "day-2-push-core-landmine-kb"
+  },
+  {
+    "name": "Day 3 \u2014 Full Body / Patterns (Landmine/KB)",
+    "category": "Landmine/Kettlebell",
+    "warmup": {
+      "duration_min": 9,
+      "notes": "Cat-Cow x10 \u00b7 90/90 Hip Switches x8/side \u00b7 Thoracic Open Books x8/side \u00b7 Dynamic Reverse Lunge x10/leg \u00b7 Bodyweight Squat x10 (repeat lunge+squat circuit 2 rounds) \u00b7 Push-Up x25"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "notes": "Alternate 1A/2A, rest 60-90s, 3 rounds",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "Bulgarian Split Squat",
+            "sets": 3,
+            "reps": "8-10/side",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": "KB goblet or suitcase hold"
+          },
+          {
+            "slot": "2A",
+            "exercise": "Landmine Lunge",
+            "sets": 3,
+            "reps": "8-10/side",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": "Reverse lunge variation"
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "notes": "Alternate 1B/2B, rest 60s, 3 rounds \u00b7 Between blocks: 25 Push-Ups (elevate hands if the shoulder talks)",
+        "slots": [
+          {
+            "slot": "1B",
+            "exercise": "Landmine Squat",
+            "sets": 3,
+            "reps": "8-10",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": "+ press at top \u2014 squat-to-press combo"
+          },
+          {
+            "slot": "2B",
+            "exercise": "KB Pull-Unders",
+            "sets": 3,
+            "reps": "8-10/side",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Keep Climbing Block",
+        "notes": "Superset, rest 30-45s, if time allows \u00b7 Between blocks: 25 Push-Ups (elevate hands if the shoulder talks)",
+        "slots": [
+          {
+            "slot": "1C",
+            "exercise": "Leg Extension",
+            "sets": 2,
+            "reps": "15-20",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": "Machine \u2014 zero back load"
+          },
+          {
+            "slot": "2C",
+            "exercise": "Lying Leg Curl",
+            "sets": 2,
+            "reps": "15-20",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": "Or seated leg curl"
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Sled Sprint",
+          "sets": 3,
+          "reps": "30 sec intervals",
+          "weight": "controlled march/drive pace",
+          "rest_sec": 60,
+          "notes": "Rest ~60s between intervals. Smooth, powerful strides \u2014 controlled march/drive pace, not an all-out sprint during this block."
+        }
+      ]
+    },
+    "day_notes": "3-day Landmine/Kettlebell block \u2014 Day 3 of 3. Target rep range 8-10.",
+    "id": "day-3-full-body-patterns-landmine-kb"
   }
 ]

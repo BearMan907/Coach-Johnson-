@@ -89,7 +89,10 @@ def slot_letter(idx):
 
 
 def slot_label_for(block_num, idx):
-    return f"{block_num}{slot_letter(idx)}"
+    # Number = exercise's position within the block, letter = which block —
+    # matches Tyler's real programming notation (1A/2A in Block 1, then
+    # 1B/2B in Block 2), not a running "1A,1B,1C" count within one block.
+    return f"{idx + 1}{slot_letter(block_num - 1)}"
 
 
 # ---------- storage ----------
@@ -220,7 +223,7 @@ def blank_program():
         "category": TEMPLATE_CATEGORIES[0],
         "warmup": {"duration_min": 10, "notes": ""},
         "blocks": [
-            {"label": f"Block {i + 1}",
+            {"label": f"Block {i + 1}", "notes": "",
              "slots": [empty_slot(slot_label_for(i + 1, j)) for j in range(DEFAULT_SLOTS_PER_BLOCK)]}
             for i in range(DEFAULT_BLOCK_COUNT)
         ],
@@ -271,6 +274,7 @@ def normalize_workout(w):
     w.setdefault("blocks", [])
     for b in w["blocks"]:
         b.setdefault("label", "Block")
+        b.setdefault("notes", "")
         b.setdefault("slots", [])
         for s in b["slots"]:
             s.setdefault("slot", "")
@@ -321,7 +325,7 @@ def get_workout(client, key_date):
     return {
         "warmup": {"duration_min": 10, "notes": ""},
         "blocks": [
-            {"label": f"Block {i + 1}",
+            {"label": f"Block {i + 1}", "notes": "",
              "slots": [empty_slot(slot_label_for(i + 1, j)) for j in range(DEFAULT_SLOTS_PER_BLOCK)]}
             for i in range(DEFAULT_BLOCK_COUNT)
         ],
@@ -492,11 +496,16 @@ def render_program_blocks_editor(state, base_id, client=None):
     remove_block_idx = None
     for i, block in enumerate(blocks):
         block_num = i + 1
-        block["label"] = f"Block {block_num}"
-        header_col, del_col = st.columns([6, 1])
-        header_col.subheader(block["label"])
+        if not block.get("label", "").strip():
+            block["label"] = f"Block {block_num}"
+        name_col, del_col = st.columns([6, 1])
+        block["label"] = name_col.text_input(f"Block {block_num} name", value=block["label"],
+                                              key=f"blockname_{base_id}_{i}")
         if del_col.button("\U0001F5D1 Remove block", key=f"delblock_{base_id}_{i}"):
             remove_block_idx = i
+        block["notes"] = st.text_input(
+            "Block notes (e.g. \"alternate 1A/2A, rest 60-90s, 3 rounds\")",
+            value=block.get("notes", ""), key=f"blocknotes_{base_id}_{i}")
         for j, slot in enumerate(block["slots"]):
             slot["slot"] = slot_label_for(block_num, j)
         render_slot_list(client, options, f"blk_{base_id}_{i}", block["slots"],
@@ -506,7 +515,7 @@ def render_program_blocks_editor(state, base_id, client=None):
         st.rerun()
 
     if st.button("+ Add block", key=f"addblock_{base_id}"):
-        blocks.append({"label": "", "slots": [empty_slot(""), empty_slot("")]})
+        blocks.append({"label": "", "notes": "", "slots": [empty_slot(""), empty_slot("")]})
         st.rerun()
 
     st.subheader("FINISHER")
@@ -609,41 +618,106 @@ def tab_program_calendar(client):
     render_workout_editor(client, selected)
 
 
-def render_workout_readonly(client, workout):
+BLOCK_ACCENTS = [METRIC_COLOR["weight"], METRIC_COLOR["muscle"], METRIC_COLOR["body_fat"],
+                 METRIC_COLOR["waist"], METRIC_COLOR["other"], METRIC_COLOR["vo2max"]]
+
+
+def _wc_section_header(text, accent):
+    return (f'<div style="background:{CHROME["page"]}; padding:10px 18px; '
+            f'border-left:5px solid {accent}; margin-top:14px;">'
+            f'<span style="color:{CHROME["text_primary"]}; font-weight:800; letter-spacing:0.03em; '
+            f'font-size:0.92rem; text-transform:uppercase;">{html.escape(text)}</span></div>')
+
+
+def _wc_callout(text, accent):
+    return (f'<div style="background:{accent}26; padding:7px 18px;">'
+            f'<span style="color:{CHROME["text_primary"]}; font-size:0.82rem; font-weight:600;">'
+            f'{html.escape(text)}</span></div>')
+
+
+def _wc_row(left_html, right_html, zebra, note_text=None):
+    bg = CHROME["surface"] if zebra else CHROME["page"]
+    out = (f'<div style="display:flex; justify-content:space-between; gap:14px; '
+           f'padding:9px 18px; background:{bg};">'
+           f'<span style="color:{CHROME["text_secondary"]}; font-size:0.88rem;">{left_html}</span>'
+           f'<span style="color:{CHROME["text_primary"]}; font-weight:700; font-size:0.88rem; '
+           f'white-space:nowrap;">{right_html}</span></div>')
+    if note_text:
+        out += (f'<div style="background:{bg}; padding:0 18px 8px 18px;">'
+                f'<span style="color:{CHROME["muted"]}; font-size:0.76rem; font-style:italic;">'
+                f'{html.escape(note_text)}</span></div>')
+    return out
+
+
+def _wc_exercise_row(client, s, zebra):
+    left = f'<b>{html.escape(s["slot"])})</b> {html.escape(s["exercise"])}' if s.get("slot") else \
+        f'<b>{html.escape(s["exercise"])}</b>'
+    if s.get("weight"):
+        left += f' &mdash; {html.escape(str(s["weight"]))}'
+    right = f'{s.get("sets", "")} x {html.escape(str(s.get("reps", "")))}'
+    note_bits = []
+    if s.get("notes"):
+        note_bits.append(s["notes"])
+    if s.get("rest_sec"):
+        note_bits.append(f'rest {s["rest_sec"]}s')
+    if client:
+        last = last_performance(client, s["exercise"])
+        if last:
+            note_bits.append(f'Last time: {last["load_lb"]:g} lb x {last["reps"]}')
+    return _wc_row(left, right, zebra, " · ".join(note_bits) if note_bits else None)
+
+
+def render_workout_card(client, workout, title=None):
+    """Colorful, PDF-style client-facing workout display: dark section
+    headers with a rotating accent per block, zebra-striped exercise rows
+    with bold right-aligned prescription, a tinted callout for block-level
+    superset/rest instructions, and a gold-accented FINISHER — modeled on
+    Tyler's real branded program handouts."""
+    parts = [f'<div style="border-radius:14px; overflow:hidden; border:1px solid {CHROME["grid"]}; '
+             f'margin-bottom:10px;">']
+
+    if title:
+        parts.append(
+            f'<div style="background:{CHROME["page"]}; padding:16px 18px 12px 18px;">'
+            f'<div style="color:{CHROME["text_primary"]}; font-size:1.15rem; font-weight:800;">'
+            f'{html.escape(title)}</div>'
+            f'<div style="color:{METRIC_COLOR["strength"]}; font-size:0.78rem; font-weight:700; '
+            f'letter-spacing:0.05em; margin-top:2px;">COACHJOHNSON &middot; KEEP CLIMBING</div></div>'
+        )
+
     warmup = workout.get("warmup", {})
     if warmup.get("duration_min") or warmup.get("notes"):
-        note = f" · {warmup['notes']}" if warmup.get("notes") else ""
-        st.write(f"**Warmup / Stretch** — {warmup.get('duration_min', 0)} min{note}")
+        label = "WARM-UP / STRETCH"
+        if warmup.get("duration_min"):
+            label += f' ({warmup["duration_min"]} MIN)'
+        parts.append(_wc_section_header(label, CHROME["baseline"]))
+        if warmup.get("notes"):
+            parts.append(_wc_row(html.escape(warmup["notes"]), "", True))
 
-    for b in workout.get("blocks", []):
+    for i, b in enumerate(workout.get("blocks", [])):
         filled = [s for s in b.get("slots", []) if s.get("exercise")]
         if not filled:
             continue
-        st.write(f"**{b['label']}**")
-        for s in filled:
-            extra = f" · {s['weight']}" if s.get("weight") else ""
-            rest = f" · rest {s['rest_sec']}s" if s.get("rest_sec") else ""
-            st.write(f"- {s['slot']}) **{s['exercise']}** — {s.get('sets', '')} x {s.get('reps', '')}{extra}{rest}")
-            if s.get("notes"):
-                st.caption(f"Note: {s['notes']}")
-            last = last_performance(client, s["exercise"])
-            if last:
-                st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']}")
+        accent = BLOCK_ACCENTS[i % len(BLOCK_ACCENTS)]
+        parts.append(_wc_section_header(b.get("label", f"Block {i + 1}"), accent))
+        if b.get("notes"):
+            parts.append(_wc_callout(b["notes"], accent))
+        for j, s in enumerate(filled):
+            parts.append(_wc_exercise_row(client, s, j % 2 == 1))
 
     fin_filled = [s for s in workout.get("finisher", {}).get("slots", []) if s.get("exercise")]
     if fin_filled:
-        st.write("**FINISHER**")
-        for s in fin_filled:
-            extra = f" · {s['weight']}" if s.get("weight") else ""
-            st.write(f"- **{s['exercise']}** — {s.get('sets', '')} x {s.get('reps', '')}{extra}")
-            if s.get("notes"):
-                st.caption(f"Note: {s['notes']}")
-            last = last_performance(client, s["exercise"])
-            if last:
-                st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']}")
+        parts.append(_wc_section_header("FINISHER", METRIC_COLOR["strength"]))
+        for j, s in enumerate(fin_filled):
+            parts.append(_wc_exercise_row(client, s, j % 2 == 1))
 
     if workout.get("day_notes"):
-        st.caption(workout["day_notes"])
+        parts.append(f'<div style="padding:10px 18px; background:{CHROME["surface"]};">'
+                      f'<span style="color:{CHROME["muted"]}; font-size:0.8rem; font-style:italic;">'
+                      f'{html.escape(workout["day_notes"])}</span></div>')
+
+    parts.append("</div>")
+    st.markdown("".join(parts), unsafe_allow_html=True)
 
 
 def render_readonly_calendar(client):
@@ -660,12 +734,11 @@ def render_readonly_calendar(client):
     if selected_str:
         workout = normalize_workout(client.get("workouts", {}).get(selected_str))
         selected = datetime.strptime(selected_str, "%Y-%m-%d").date()
-        st.markdown(f"**{selected.strftime('%A, %b %d, %Y')}**")
         if not workout or not workout_exercise_count(workout):
-            st.caption("No workout planned for this day.")
+            st.caption(f"No workout planned for {selected.strftime('%A, %b %d, %Y')}.")
         else:
             st.caption(f"Status: {workout.get('status', 'planned').title()}")
-            render_workout_readonly(client, workout)
+            render_workout_card(client, workout, title=selected.strftime("%A, %B %d, %Y"))
 
 
 # ---------- trainer pages ----------
@@ -949,7 +1022,7 @@ def page_program_library():
     else:
         for t in filtered:
             with st.expander(f"{t['name']} — {t['category']}"):
-                render_workout_readonly(None, t)
+                render_workout_card(None, t, title=t["name"])
                 c1, c2 = st.columns(2)
                 if c1.button("Edit", key=f"edittpl_{t['id']}"):
                     st.session_state["editing_template_id"] = t["id"]
