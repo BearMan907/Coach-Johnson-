@@ -12,6 +12,7 @@
   {"name": "Lateral Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
   {"name": "Step-Up", "pattern": "Lunge", "muscle_group": "Quads"},
   {"name": "Leg Extension", "pattern": "Squat", "muscle_group": "Quads"},
+  {"name": "Landmine Squat", "pattern": "Squat", "muscle_group": "Quads"},
 
   {"name": "Conventional Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
   {"name": "Sumo Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
@@ -44,6 +45,7 @@
 
   {"name": "Barbell Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
   {"name": "Pendlay Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
+  {"name": "Landmine Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
   {"name": "Dumbbell Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
   {"name": "Chest-Supported Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
   {"name": "Seated Cable Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
@@ -84,6 +86,7 @@
   {"name": "Russian Twist", "pattern": "Core", "muscle_group": "Core"},
   {"name": "Dead Bug", "pattern": "Core", "muscle_group": "Core"},
   {"name": "Pallof Press", "pattern": "Core", "muscle_group": "Core"},
+  {"name": "Landmine Rotation", "pattern": "Core", "muscle_group": "Core"},
   {"name": "V-Up", "pattern": "Core", "muscle_group": "Core"},
   {"name": "Bicycle Crunch", "pattern": "Core", "muscle_group": "Core"},
 

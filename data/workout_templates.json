@@ -1,0 +1,380 @@
+[
+  {
+    "name": "Landmine & Kettlebell Burner",
+    "category": "Landmine/Kettlebell",
+    "warmup": {
+      "duration_min": 8,
+      "notes": "Hip circles + arm circles"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "Landmine Squat",
+            "sets": 3,
+            "reps": "10",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": ""
+          },
+          {
+            "slot": "1B",
+            "exercise": "Kettlebell Swing",
+            "sets": 3,
+            "reps": "15",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "slots": [
+          {
+            "slot": "2A",
+            "exercise": "Landmine Row",
+            "sets": 3,
+            "reps": "10/side",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          },
+          {
+            "slot": "2B",
+            "exercise": "Landmine Press",
+            "sets": 3,
+            "reps": "8/side",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Landmine Rotation",
+          "sets": 3,
+          "reps": "12/side",
+          "weight": "",
+          "rest_sec": 30,
+          "notes": ""
+        }
+      ]
+    },
+    "day_notes": "Great fill-in day when the platforms are busy \u2014 only needs one landmine + one bell.",
+    "id": "landmine-kettlebell-burner"
+  },
+  {
+    "name": "Hypertrophy \u2014 Push Focus",
+    "category": "Hypertrophy",
+    "warmup": {
+      "duration_min": 10,
+      "notes": "Band pull-aparts + light bench sets"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "Barbell Bench Press",
+            "sets": 4,
+            "reps": "8-10",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": ""
+          },
+          {
+            "slot": "1B",
+            "exercise": "Incline Dumbbell Bench Press",
+            "sets": 3,
+            "reps": "10-12",
+            "weight": "",
+            "rest_sec": 75,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "slots": [
+          {
+            "slot": "2A",
+            "exercise": "Dumbbell Shoulder Press",
+            "sets": 3,
+            "reps": "10",
+            "weight": "",
+            "rest_sec": 75,
+            "notes": ""
+          },
+          {
+            "slot": "2B",
+            "exercise": "Cable Chest Fly",
+            "sets": 3,
+            "reps": "12-15",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Block 3",
+        "slots": [
+          {
+            "slot": "3A",
+            "exercise": "Tricep Pushdown",
+            "sets": 3,
+            "reps": "12-15",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": ""
+          },
+          {
+            "slot": "3B",
+            "exercise": "Lateral Raise",
+            "sets": 3,
+            "reps": "15",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": ""
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Push-Up",
+          "sets": 2,
+          "reps": "AMRAP",
+          "weight": "bodyweight",
+          "rest_sec": 0,
+          "notes": "Near-failure burnout"
+        }
+      ]
+    },
+    "day_notes": "Standard hypertrophy push day \u2014 8-15 rep range throughout, moderate rest.",
+    "id": "hypertrophy-push-focus"
+  },
+  {
+    "name": "Glute Buster",
+    "category": "Glute Focus",
+    "warmup": {
+      "duration_min": 8,
+      "notes": "Glute bridges + hip circles"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "Hip Thrust",
+            "sets": 4,
+            "reps": "10",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": ""
+          },
+          {
+            "slot": "1B",
+            "exercise": "Romanian Deadlift",
+            "sets": 3,
+            "reps": "10",
+            "weight": "",
+            "rest_sec": 90,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "slots": [
+          {
+            "slot": "2A",
+            "exercise": "Bulgarian Split Squat",
+            "sets": 3,
+            "reps": "10/leg",
+            "weight": "",
+            "rest_sec": 75,
+            "notes": ""
+          },
+          {
+            "slot": "2B",
+            "exercise": "Cable Pull-Through",
+            "sets": 3,
+            "reps": "12",
+            "weight": "",
+            "rest_sec": 60,
+            "notes": ""
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Lateral Lunge",
+          "sets": 3,
+          "reps": "12/side",
+          "weight": "bodyweight",
+          "rest_sec": 30,
+          "notes": ""
+        }
+      ]
+    },
+    "day_notes": "",
+    "id": "glute-buster"
+  },
+  {
+    "name": "Strength \u2014 Lower Body",
+    "category": "Strength",
+    "warmup": {
+      "duration_min": 10,
+      "notes": "Bar-only squat sets + hip mobility"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "Back Squat",
+            "sets": 5,
+            "reps": "5",
+            "weight": "",
+            "rest_sec": 150,
+            "notes": ""
+          },
+          {
+            "slot": "1B",
+            "exercise": "Conventional Deadlift",
+            "sets": 3,
+            "reps": "3",
+            "weight": "",
+            "rest_sec": 180,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "slots": [
+          {
+            "slot": "2A",
+            "exercise": "Walking Lunge",
+            "sets": 3,
+            "reps": "10/leg",
+            "weight": "",
+            "rest_sec": 75,
+            "notes": ""
+          },
+          {
+            "slot": "2B",
+            "exercise": "Standing Calf Raise",
+            "sets": 3,
+            "reps": "15",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": ""
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Farmer's Carry",
+          "sets": 3,
+          "reps": "40yd",
+          "weight": "",
+          "rest_sec": 60,
+          "notes": ""
+        }
+      ]
+    },
+    "day_notes": "Heavy day \u2014 prioritize the main lifts, keep accessory volume in reserve.",
+    "id": "strength-lower-body"
+  },
+  {
+    "name": "Conditioning \u2014 Metabolic Circuit",
+    "category": "Conditioning",
+    "warmup": {
+      "duration_min": 6,
+      "notes": "Jump rope + mobility flow"
+    },
+    "blocks": [
+      {
+        "label": "Block 1",
+        "slots": [
+          {
+            "slot": "1A",
+            "exercise": "Kettlebell Swing",
+            "sets": 4,
+            "reps": "15",
+            "weight": "",
+            "rest_sec": 30,
+            "notes": ""
+          },
+          {
+            "slot": "1B",
+            "exercise": "Box Jump",
+            "sets": 4,
+            "reps": "8",
+            "weight": "",
+            "rest_sec": 45,
+            "notes": ""
+          }
+        ]
+      },
+      {
+        "label": "Block 2",
+        "slots": [
+          {
+            "slot": "2A",
+            "exercise": "Battle Ropes",
+            "sets": 4,
+            "reps": "30s",
+            "weight": "",
+            "rest_sec": 30,
+            "notes": ""
+          },
+          {
+            "slot": "2B",
+            "exercise": "Mountain Climbers",
+            "sets": 4,
+            "reps": "20",
+            "weight": "",
+            "rest_sec": 30,
+            "notes": ""
+          }
+        ]
+      }
+    ],
+    "finisher": {
+      "slots": [
+        {
+          "slot": "Finisher A",
+          "exercise": "Assault Bike",
+          "sets": 1,
+          "reps": "8 x 20s sprint / 40s rest",
+          "weight": "",
+          "rest_sec": 0,
+          "notes": ""
+        }
+      ]
+    },
+    "day_notes": "Keep rest short throughout \u2014 this is meant to be uncomfortable.",
+    "id": "conditioning-metabolic-circuit"
+  }
+]

@@ -8,7 +8,7 @@ import html
 import string
 import copy
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 DATA_DIR = Path(__file__).parent / "data" / "clients"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -73,10 +73,15 @@ CAL_CSS = """
 """
 
 EXERCISE_LIBRARY_PATH = Path(__file__).parent / "data" / "exercise_library.json"
+TEMPLATES_PATH = Path(__file__).parent / "data" / "workout_templates.json"
 
 DEFAULT_BLOCK_COUNT = 3
 DEFAULT_SLOTS_PER_BLOCK = 2
 DEFAULT_FINISHER_SLOTS = 2
+
+TEMPLATE_CATEGORIES = [
+    "Landmine/Kettlebell", "Hypertrophy", "Glute Focus", "Strength", "Conditioning", "Full Body", "Custom",
+]
 
 
 def slot_letter(idx):
@@ -193,7 +198,7 @@ def exercise_options():
 
 
 def last_performance(client, exercise_name, before_date=None):
-    if not exercise_name:
+    if not client or not exercise_name:
         return None
     entries = [e for e in client.get("lift_entries", [])
                if e.get("exercise", "").strip().lower() == exercise_name.strip().lower()]
@@ -206,6 +211,43 @@ def last_performance(client, exercise_name, before_date=None):
 
 def empty_slot(label):
     return {"slot": label, "exercise": "", "sets": 0, "reps": "", "weight": "", "rest_sec": 0, "notes": ""}
+
+
+def blank_program():
+    return {
+        "id": "",
+        "name": "",
+        "category": TEMPLATE_CATEGORIES[0],
+        "warmup": {"duration_min": 10, "notes": ""},
+        "blocks": [
+            {"label": f"Block {i + 1}",
+             "slots": [empty_slot(slot_label_for(i + 1, j)) for j in range(DEFAULT_SLOTS_PER_BLOCK)]}
+            for i in range(DEFAULT_BLOCK_COUNT)
+        ],
+        "finisher": {"slots": [empty_slot(f"Finisher {slot_letter(j)}") for j in range(DEFAULT_FINISHER_SLOTS)]},
+        "day_notes": "",
+    }
+
+
+def load_templates():
+    if not TEMPLATES_PATH.exists():
+        return []
+    return json.loads(TEMPLATES_PATH.read_text())
+
+
+def save_templates(templates):
+    TEMPLATES_PATH.write_text(json.dumps(templates, indent=2))
+
+
+def new_template_id(name):
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "program"
+    existing = {t["id"] for t in load_templates()}
+    candidate = slug
+    n = 2
+    while candidate in existing:
+        candidate = f"{slug}-{n}"
+        n += 1
+    return candidate
 
 
 def normalize_workout(w):
@@ -407,7 +449,7 @@ def render_slot_row(client, options, prefix, slot):
                                         key=f"{prefix}_rest")
     slot["notes"] = c6.text_input("Notes", value=slot.get("notes", ""), key=f"{prefix}_notes", placeholder="cues")
     remove_clicked = c7.button("\U0001F5D1", key=f"{prefix}_del", help="Remove this exercise")
-    if slot["exercise"]:
+    if client and slot["exercise"]:
         last = last_performance(client, slot["exercise"])
         if last:
             st.caption(f"Last time: {last['load_lb']:g} lb × {last['reps']} (on {last['date']})")
@@ -431,23 +473,22 @@ def render_slot_list(client, options, prefix, slots, add_label):
         st.rerun()
 
 
-def render_workout_editor(client, target_date):
-    key_date = str(target_date)
-    workout = get_workout_state(client, key_date)
-    st.markdown(f"### {target_date.strftime('%A, %b %d, %Y')}")
-
+def render_program_blocks_editor(state, base_id, client=None):
+    """Warmup + dynamic Blocks + FINISHER editing UI, mutating `state` in
+    place. Shared between per-client-day editing (client passed, so "last
+    time" lookups work) and standalone Program Library template editing
+    (client=None, no per-client history to show)."""
     options = exercise_options()
-    base_id = f"{client['id']}_{key_date}"
 
     st.subheader("Warmup / Stretch")
     c1, c2 = st.columns([1, 3])
-    workout["warmup"]["duration_min"] = c1.number_input(
+    state["warmup"]["duration_min"] = c1.number_input(
         "Duration (min)", min_value=0, step=5,
-        value=int(workout.get("warmup", {}).get("duration_min") or 10), key=f"warmup_min_{base_id}")
-    workout["warmup"]["notes"] = c2.text_input(
-        "Notes", value=workout.get("warmup", {}).get("notes", ""), key=f"warmup_notes_{base_id}")
+        value=int(state.get("warmup", {}).get("duration_min") or 10), key=f"warmup_min_{base_id}")
+    state["warmup"]["notes"] = c2.text_input(
+        "Notes", value=state.get("warmup", {}).get("notes", ""), key=f"warmup_notes_{base_id}")
 
-    blocks = workout["blocks"]
+    blocks = state["blocks"]
     remove_block_idx = None
     for i, block in enumerate(blocks):
         block_num = i + 1
@@ -469,10 +510,39 @@ def render_workout_editor(client, target_date):
         st.rerun()
 
     st.subheader("FINISHER")
-    fin_slots = workout["finisher"]["slots"]
+    fin_slots = state["finisher"]["slots"]
     for j, slot in enumerate(fin_slots):
         slot["slot"] = f"Finisher {slot_letter(j)}"
     render_slot_list(client, options, f"fin_{base_id}", fin_slots, add_label="+ Add exercise to Finisher")
+
+
+def render_workout_editor(client, target_date):
+    key_date = str(target_date)
+    workout = get_workout_state(client, key_date)
+    st.markdown(f"### {target_date.strftime('%A, %b %d, %Y')}")
+
+    base_id = f"{client['id']}_{key_date}"
+
+    templates = load_templates()
+    if templates:
+        with st.expander("Load from a saved program"):
+            cat = st.selectbox("Category", ["All"] + TEMPLATE_CATEGORIES, key=f"tplcat_{base_id}")
+            candidates = templates if cat == "All" else [t for t in templates if t["category"] == cat]
+            if candidates:
+                tpl_names = [t["name"] for t in candidates]
+                picked_tpl = st.selectbox("Program", tpl_names, key=f"tplpick_{base_id}")
+                if st.button("Load into this day", key=f"tplload_{base_id}"):
+                    chosen = next(t for t in candidates if t["name"] == picked_tpl)
+                    workout["warmup"] = copy.deepcopy(chosen["warmup"])
+                    workout["blocks"] = copy.deepcopy(chosen["blocks"])
+                    workout["finisher"] = copy.deepcopy(chosen["finisher"])
+                    workout["day_notes"] = chosen.get("day_notes", "")
+                    st.success(f"Loaded \"{picked_tpl}\". Review/adjust weights below, then Save.")
+                    st.rerun()
+            else:
+                st.caption("No programs in this category yet — build one in the Program Library tab.")
+
+    render_program_blocks_editor(workout, base_id, client=client)
 
     wstatus = st.selectbox("Status", ["planned", "completed", "missed"],
                             index=["planned", "completed", "missed"].index(workout.get("status", "planned")),
@@ -480,7 +550,7 @@ def render_workout_editor(client, target_date):
     workout["status"] = wstatus
     workout["day_notes"] = st.text_area("Day notes", value=workout.get("day_notes", ""), key=f"daynotes_{base_id}")
 
-    all_slots = [s for b in blocks for s in b["slots"]] + fin_slots
+    all_slots = [s for b in workout["blocks"] for s in b["slots"]] + workout["finisher"]["slots"]
     filled_slots = [s for s in all_slots if s.get("exercise")]
 
     actual_inputs = {}
@@ -511,6 +581,14 @@ def render_workout_editor(client, target_date):
         save_client(client)
         st.success("Workout saved.")
         st.rerun()
+
+    with st.expander("Duplicate this workout to another date"):
+        dup_date = st.date_input("Copy to date", value=target_date + timedelta(days=7),
+                                  key=f"dupdate_{base_id}")
+        if st.button("Duplicate", key=f"dupbtn_{base_id}"):
+            client.setdefault("workouts", {})[str(dup_date)] = copy.deepcopy(workout)
+            save_client(client)
+            st.success(f"Duplicated to {dup_date.strftime('%A, %b %d, %Y')}.")
 
 
 def tab_program_calendar(client):
@@ -855,6 +933,75 @@ def tab_milestones(client):
             st.write(f"**{m['date']}** — {m['description']}")
 
 
+def page_program_library():
+    st.title("Program Library")
+    st.caption("Pre-build reusable programs by category, then load them into any client's Program Calendar.")
+
+    templates = load_templates()
+
+    st.subheader("Saved Programs")
+    cat_filter = st.selectbox("Filter by category", ["All"] + TEMPLATE_CATEGORIES, key="lib_cat_filter")
+    filtered = templates if cat_filter == "All" else [t for t in templates if t["category"] == cat_filter]
+
+    if not filtered:
+        st.info("No programs yet in this category." if templates else
+                "No programs yet — build your first one below.")
+    else:
+        for t in filtered:
+            with st.expander(f"{t['name']} — {t['category']}"):
+                render_workout_readonly(None, t)
+                c1, c2 = st.columns(2)
+                if c1.button("Edit", key=f"edittpl_{t['id']}"):
+                    st.session_state["editing_template_id"] = t["id"]
+                    st.session_state.pop(f"template_state_{t['id']}", None)
+                    st.rerun()
+                if c2.button("Delete", key=f"deltpl_{t['id']}"):
+                    remaining = [x for x in templates if x["id"] != t["id"]]
+                    save_templates(remaining)
+                    st.session_state.pop(f"template_state_{t['id']}", None)
+                    st.success(f"Deleted \"{t['name']}\".")
+                    st.rerun()
+
+    st.divider()
+    editing_id = st.session_state.get("editing_template_id")
+    editing = next((t for t in templates if t["id"] == editing_id), None) if editing_id else None
+    st.subheader(f"Editing: {editing['name']}" if editing else "Create a New Program")
+
+    state_key = f"template_state_{editing_id or 'new'}"
+    if state_key not in st.session_state:
+        st.session_state[state_key] = copy.deepcopy(editing) if editing else blank_program()
+    draft = st.session_state[state_key]
+
+    c1, c2 = st.columns(2)
+    draft["name"] = c1.text_input("Program name", value=draft.get("name", ""), key=f"{state_key}_name")
+    cat_index = TEMPLATE_CATEGORIES.index(draft["category"]) if draft.get("category") in TEMPLATE_CATEGORIES else 0
+    draft["category"] = c2.selectbox("Category", TEMPLATE_CATEGORIES, index=cat_index, key=f"{state_key}_cat")
+
+    render_program_blocks_editor(draft, state_key, client=None)
+    draft["day_notes"] = st.text_area("Program notes", value=draft.get("day_notes", ""), key=f"{state_key}_notes")
+
+    save_col, cancel_col = st.columns(2)
+    if save_col.button("Save Program", key=f"{state_key}_save"):
+        if not draft["name"].strip():
+            st.error("Give the program a name first.")
+        else:
+            all_templates = load_templates()
+            if editing_id:
+                all_templates = [draft if t["id"] == editing_id else t for t in all_templates]
+            else:
+                draft["id"] = new_template_id(draft["name"])
+                all_templates.append(draft)
+            save_templates(all_templates)
+            st.session_state.pop(state_key, None)
+            st.session_state.pop("editing_template_id", None)
+            st.success(f"Saved \"{draft['name']}\".")
+            st.rerun()
+    if editing and cancel_col.button("Cancel edit", key=f"{state_key}_cancel"):
+        st.session_state.pop(state_key, None)
+        st.session_state.pop("editing_template_id", None)
+        st.rerun()
+
+
 def page_trainer_client():
     st.title("Client Workspace")
     clients = list_clients()
@@ -955,8 +1102,8 @@ if mode == "Trainer":
         st.session_state["trainer_nav"] = "Roster"
     trainer_nav = st.sidebar.radio(
         "Trainer Menu",
-        ["Roster", "Add Client", "Client Workspace"],
-        index=["Roster", "Add Client", "Client Workspace"].index(st.session_state["trainer_nav"]),
+        ["Roster", "Add Client", "Client Workspace", "Program Library"],
+        index=["Roster", "Add Client", "Client Workspace", "Program Library"].index(st.session_state["trainer_nav"]),
     )
     st.session_state["trainer_nav"] = trainer_nav
 
@@ -966,5 +1113,7 @@ if mode == "Trainer":
         page_add_client()
     elif trainer_nav == "Client Workspace":
         page_trainer_client()
+    elif trainer_nav == "Program Library":
+        page_program_library()
 else:
     page_client_view()
