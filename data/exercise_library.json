@@ -1,134 +1,981 @@
 [
-  {"name": "Back Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Front Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Goblet Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Box Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Bulgarian Split Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Zercher Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Hack Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Leg Press", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Walking Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
-  {"name": "Reverse Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
-  {"name": "Landmine Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
-  {"name": "Lateral Lunge", "pattern": "Lunge", "muscle_group": "Quads"},
-  {"name": "Step-Up", "pattern": "Lunge", "muscle_group": "Quads"},
-  {"name": "Leg Extension", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Bodyweight Squat", "pattern": "Squat", "muscle_group": "Quads"},
-  {"name": "Landmine Squat", "pattern": "Squat", "muscle_group": "Quads"},
-
-  {"name": "Conventional Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Sumo Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Romanian Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Trap Bar Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Single-Leg RDL", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Good Morning", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Hip Thrust", "pattern": "Hinge", "muscle_group": "Glutes"},
-  {"name": "Glute Bridge", "pattern": "Hinge", "muscle_group": "Glutes"},
-  {"name": "Kettlebell Swing", "pattern": "Hinge", "muscle_group": "Glutes"},
-  {"name": "KB Deadlift", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Cable Pull-Through", "pattern": "Hinge", "muscle_group": "Glutes"},
-  {"name": "Lying Leg Curl", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-  {"name": "Seated Leg Curl", "pattern": "Hinge", "muscle_group": "Hamstrings"},
-
-  {"name": "Barbell Bench Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "Dumbbell Bench Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "Incline Barbell Bench Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "Incline Dumbbell Bench Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "Push-Up", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "KB Floor Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "Cable Chest Fly", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "Machine Chest Press", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-  {"name": "Dip", "pattern": "Push Horizontal", "muscle_group": "Chest"},
-
-  {"name": "Overhead Press", "pattern": "Push Vertical", "muscle_group": "Shoulders"},
-  {"name": "Dumbbell Shoulder Press", "pattern": "Push Vertical", "muscle_group": "Shoulders"},
-  {"name": "Arnold Press", "pattern": "Push Vertical", "muscle_group": "Shoulders"},
-  {"name": "Push Press", "pattern": "Push Vertical", "muscle_group": "Shoulders"},
-  {"name": "Landmine Press", "pattern": "Push Vertical", "muscle_group": "Shoulders"},
-  {"name": "Machine Shoulder Press", "pattern": "Push Vertical", "muscle_group": "Shoulders"},
-
-  {"name": "Barbell Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-  {"name": "Pendlay Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-  {"name": "Landmine Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-  {"name": "Dumbbell Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-  {"name": "Chest-Supported Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-  {"name": "Seated Cable Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-  {"name": "T-Bar Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-  {"name": "Inverted Row", "pattern": "Pull Horizontal", "muscle_group": "Back"},
-
-  {"name": "Pull-Up", "pattern": "Pull Vertical", "muscle_group": "Back"},
-  {"name": "Chin-Up", "pattern": "Pull Vertical", "muscle_group": "Back"},
-  {"name": "Lat Pulldown", "pattern": "Pull Vertical", "muscle_group": "Back"},
-  {"name": "Assisted Pull-Up", "pattern": "Pull Vertical", "muscle_group": "Back"},
-  {"name": "Straight-Arm Pulldown", "pattern": "Pull Vertical", "muscle_group": "Back"},
-
-  {"name": "Barbell Curl", "pattern": "Arms", "muscle_group": "Biceps"},
-  {"name": "Dumbbell Curl", "pattern": "Arms", "muscle_group": "Biceps"},
-  {"name": "Hammer Curl", "pattern": "Arms", "muscle_group": "Biceps"},
-  {"name": "Incline Dumbbell Curl", "pattern": "Arms", "muscle_group": "Biceps"},
-  {"name": "Cable Curl", "pattern": "Arms", "muscle_group": "Biceps"},
-  {"name": "Preacher Curl", "pattern": "Arms", "muscle_group": "Biceps"},
-  {"name": "Tricep Pushdown", "pattern": "Arms", "muscle_group": "Triceps"},
-  {"name": "Overhead Tricep Extension", "pattern": "Arms", "muscle_group": "Triceps"},
-  {"name": "Skull Crusher", "pattern": "Arms", "muscle_group": "Triceps"},
-  {"name": "Close-Grip Bench Press", "pattern": "Arms", "muscle_group": "Triceps"},
-  {"name": "Dumbbell Kickback", "pattern": "Arms", "muscle_group": "Triceps"},
-
-  {"name": "Lateral Raise", "pattern": "Shoulders Isolation", "muscle_group": "Shoulders"},
-  {"name": "Cable Lateral Raise", "pattern": "Shoulders Isolation", "muscle_group": "Shoulders"},
-  {"name": "Front Raise", "pattern": "Shoulders Isolation", "muscle_group": "Shoulders"},
-  {"name": "Rear Delt Fly", "pattern": "Shoulders Isolation", "muscle_group": "Shoulders"},
-  {"name": "Face Pull", "pattern": "Shoulders Isolation", "muscle_group": "Shoulders"},
-  {"name": "Upright Row", "pattern": "Shoulders Isolation", "muscle_group": "Shoulders"},
-  {"name": "Shrug", "pattern": "Shoulders Isolation", "muscle_group": "Back"},
-
-  {"name": "Plank", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Side Plank", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Hanging Leg Raise", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Cable Crunch", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Ab Wheel Rollout", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Russian Twist", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Dead Bug", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Pallof Press", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "KB Halo", "pattern": "Core", "muscle_group": "Shoulders"},
-  {"name": "KB Pull-Unders", "pattern": "Core", "muscle_group": "Full Body"},
-  {"name": "Landmine Rotation", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "V-Up", "pattern": "Core", "muscle_group": "Core"},
-  {"name": "Bicycle Crunch", "pattern": "Core", "muscle_group": "Core"},
-
-  {"name": "Standing Calf Raise", "pattern": "Calves", "muscle_group": "Calves"},
-  {"name": "Seated Calf Raise", "pattern": "Calves", "muscle_group": "Calves"},
-  {"name": "Single-Leg Calf Raise", "pattern": "Calves", "muscle_group": "Calves"},
-
-  {"name": "Farmer's Carry", "pattern": "Carry", "muscle_group": "Full Body"},
-  {"name": "Suitcase Carry", "pattern": "Carry", "muscle_group": "Full Body"},
-  {"name": "Sled Push", "pattern": "Carry", "muscle_group": "Full Body"},
-  {"name": "Sled Pull", "pattern": "Carry", "muscle_group": "Full Body"},
-  {"name": "Yoke Walk", "pattern": "Carry", "muscle_group": "Full Body"},
-
-  {"name": "Battle Ropes", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Burpees", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Box Jump", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Assault Bike", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Rowing Machine", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Jump Rope", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Mountain Climbers", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Medicine Ball Slam", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Wall Ball", "pattern": "Conditioning", "muscle_group": "Cardio"},
-  {"name": "Sled Sprint", "pattern": "Conditioning", "muscle_group": "Cardio"},
-
-  {"name": "Foam Rolling", "pattern": "Mobility", "muscle_group": "Full Body"},
-  {"name": "Dynamic Stretching", "pattern": "Mobility", "muscle_group": "Full Body"},
-  {"name": "Band Pull-Apart", "pattern": "Mobility", "muscle_group": "Shoulders"},
-  {"name": "World's Greatest Stretch", "pattern": "Mobility", "muscle_group": "Full Body"},
-  {"name": "Hip Circles", "pattern": "Mobility", "muscle_group": "Glutes"},
-  {"name": "Arm Circles", "pattern": "Mobility", "muscle_group": "Shoulders"},
-  {"name": "Cat-Cow", "pattern": "Mobility", "muscle_group": "Core"},
-  {"name": "Leg Swings", "pattern": "Mobility", "muscle_group": "Full Body"},
-  {"name": "Walking Knee Hug", "pattern": "Mobility", "muscle_group": "Glutes"},
-  {"name": "Inchworm", "pattern": "Mobility", "muscle_group": "Full Body"},
-  {"name": "Bird Dog", "pattern": "Mobility", "muscle_group": "Core"},
-  {"name": "90/90 Hip Stretch", "pattern": "Mobility", "muscle_group": "Glutes"},
-  {"name": "90/90 Hip Switches", "pattern": "Mobility", "muscle_group": "Glutes"},
-  {"name": "Thoracic Open Books", "pattern": "Mobility", "muscle_group": "Core"}
+  {
+    "name": "Back Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Front Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Goblet Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Dumbbell",
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "Box Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Bulgarian Split Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Dumbbell",
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Zercher Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Hack Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Leg Press",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Walking Lunge",
+    "pattern": "Lunge",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Dumbbell",
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Reverse Lunge",
+    "pattern": "Lunge",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Dumbbell",
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Landmine Lunge",
+    "pattern": "Lunge",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Landmine"
+    ]
+  },
+  {
+    "name": "Lateral Lunge",
+    "pattern": "Lunge",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Bodyweight",
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Step-Up",
+    "pattern": "Lunge",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Dumbbell",
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Leg Extension",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Bodyweight Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Landmine Squat",
+    "pattern": "Squat",
+    "muscle_group": "Quads",
+    "equipment": [
+      "Landmine"
+    ]
+  },
+  {
+    "name": "Conventional Deadlift",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Sumo Deadlift",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Romanian Deadlift",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Barbell",
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Trap Bar Deadlift",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Single-Leg RDL",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Dumbbell",
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "Good Morning",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Hip Thrust",
+    "pattern": "Hinge",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Barbell",
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Glute Bridge",
+    "pattern": "Hinge",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Kettlebell Swing",
+    "pattern": "Hinge",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "KB Deadlift",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "Cable Pull-Through",
+    "pattern": "Hinge",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Lying Leg Curl",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Seated Leg Curl",
+    "pattern": "Hinge",
+    "muscle_group": "Hamstrings",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Barbell Bench Press",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Dumbbell Bench Press",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Incline Barbell Bench Press",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Incline Dumbbell Bench Press",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Push-Up",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "KB Floor Press",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "Cable Chest Fly",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Machine Chest Press",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Dip",
+    "pattern": "Push Horizontal",
+    "muscle_group": "Chest",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Overhead Press",
+    "pattern": "Push Vertical",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Dumbbell Shoulder Press",
+    "pattern": "Push Vertical",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Arnold Press",
+    "pattern": "Push Vertical",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Push Press",
+    "pattern": "Push Vertical",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Landmine Press",
+    "pattern": "Push Vertical",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Landmine"
+    ]
+  },
+  {
+    "name": "Machine Shoulder Press",
+    "pattern": "Push Vertical",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Barbell Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Pendlay Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Landmine Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Landmine"
+    ]
+  },
+  {
+    "name": "Dumbbell Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Chest-Supported Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Dumbbell",
+      "Machine"
+    ]
+  },
+  {
+    "name": "Seated Cable Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "T-Bar Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Landmine",
+      "Machine"
+    ]
+  },
+  {
+    "name": "Inverted Row",
+    "pattern": "Pull Horizontal",
+    "muscle_group": "Back",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Pull-Up",
+    "pattern": "Pull Vertical",
+    "muscle_group": "Back",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Chin-Up",
+    "pattern": "Pull Vertical",
+    "muscle_group": "Back",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Lat Pulldown",
+    "pattern": "Pull Vertical",
+    "muscle_group": "Back",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Assisted Pull-Up",
+    "pattern": "Pull Vertical",
+    "muscle_group": "Back",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Straight-Arm Pulldown",
+    "pattern": "Pull Vertical",
+    "muscle_group": "Back",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Barbell Curl",
+    "pattern": "Arms",
+    "muscle_group": "Biceps",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Dumbbell Curl",
+    "pattern": "Arms",
+    "muscle_group": "Biceps",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Hammer Curl",
+    "pattern": "Arms",
+    "muscle_group": "Biceps",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Incline Dumbbell Curl",
+    "pattern": "Arms",
+    "muscle_group": "Biceps",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Cable Curl",
+    "pattern": "Arms",
+    "muscle_group": "Biceps",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Preacher Curl",
+    "pattern": "Arms",
+    "muscle_group": "Biceps",
+    "equipment": [
+      "Barbell",
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Tricep Pushdown",
+    "pattern": "Arms",
+    "muscle_group": "Triceps",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Overhead Tricep Extension",
+    "pattern": "Arms",
+    "muscle_group": "Triceps",
+    "equipment": [
+      "Dumbbell",
+      "Cable"
+    ]
+  },
+  {
+    "name": "Skull Crusher",
+    "pattern": "Arms",
+    "muscle_group": "Triceps",
+    "equipment": [
+      "Barbell",
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Close-Grip Bench Press",
+    "pattern": "Arms",
+    "muscle_group": "Triceps",
+    "equipment": [
+      "Barbell"
+    ]
+  },
+  {
+    "name": "Dumbbell Kickback",
+    "pattern": "Arms",
+    "muscle_group": "Triceps",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Lateral Raise",
+    "pattern": "Shoulders Isolation",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Cable Lateral Raise",
+    "pattern": "Shoulders Isolation",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Front Raise",
+    "pattern": "Shoulders Isolation",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Rear Delt Fly",
+    "pattern": "Shoulders Isolation",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Face Pull",
+    "pattern": "Shoulders Isolation",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Upright Row",
+    "pattern": "Shoulders Isolation",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Barbell",
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Shrug",
+    "pattern": "Shoulders Isolation",
+    "muscle_group": "Back",
+    "equipment": [
+      "Barbell",
+      "Dumbbell"
+    ]
+  },
+  {
+    "name": "Plank",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Side Plank",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Hanging Leg Raise",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Cable Crunch",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "Ab Wheel Rollout",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Russian Twist",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Dead Bug",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Pallof Press",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Cable"
+    ]
+  },
+  {
+    "name": "KB Halo",
+    "pattern": "Core",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "KB Pull-Unders",
+    "pattern": "Core",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "Landmine Rotation",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Landmine"
+    ]
+  },
+  {
+    "name": "V-Up",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Bicycle Crunch",
+    "pattern": "Core",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Standing Calf Raise",
+    "pattern": "Calves",
+    "muscle_group": "Calves",
+    "equipment": [
+      "Machine",
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Seated Calf Raise",
+    "pattern": "Calves",
+    "muscle_group": "Calves",
+    "equipment": [
+      "Machine"
+    ]
+  },
+  {
+    "name": "Single-Leg Calf Raise",
+    "pattern": "Calves",
+    "muscle_group": "Calves",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Farmer's Carry",
+    "pattern": "Carry",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Dumbbell",
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "Suitcase Carry",
+    "pattern": "Carry",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Dumbbell",
+      "Kettlebell"
+    ]
+  },
+  {
+    "name": "Sled Push",
+    "pattern": "Carry",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Sled"
+    ]
+  },
+  {
+    "name": "Sled Pull",
+    "pattern": "Carry",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Sled"
+    ]
+  },
+  {
+    "name": "Yoke Walk",
+    "pattern": "Carry",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Sled"
+    ]
+  },
+  {
+    "name": "Battle Ropes",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Other"
+    ]
+  },
+  {
+    "name": "Burpees",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Box Jump",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Assault Bike",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Cardio Machine"
+    ]
+  },
+  {
+    "name": "Rowing Machine",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Cardio Machine"
+    ]
+  },
+  {
+    "name": "Jump Rope",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Mountain Climbers",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Medicine Ball Slam",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Other"
+    ]
+  },
+  {
+    "name": "Wall Ball",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Other"
+    ]
+  },
+  {
+    "name": "Sled Sprint",
+    "pattern": "Conditioning",
+    "muscle_group": "Cardio",
+    "equipment": [
+      "Sled"
+    ]
+  },
+  {
+    "name": "Foam Rolling",
+    "pattern": "Mobility",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Other"
+    ]
+  },
+  {
+    "name": "Dynamic Stretching",
+    "pattern": "Mobility",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Band Pull-Apart",
+    "pattern": "Mobility",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Bands"
+    ]
+  },
+  {
+    "name": "World's Greatest Stretch",
+    "pattern": "Mobility",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Hip Circles",
+    "pattern": "Mobility",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Arm Circles",
+    "pattern": "Mobility",
+    "muscle_group": "Shoulders",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Cat-Cow",
+    "pattern": "Mobility",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Leg Swings",
+    "pattern": "Mobility",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Walking Knee Hug",
+    "pattern": "Mobility",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Inchworm",
+    "pattern": "Mobility",
+    "muscle_group": "Full Body",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Bird Dog",
+    "pattern": "Mobility",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "90/90 Hip Stretch",
+    "pattern": "Mobility",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "90/90 Hip Switches",
+    "pattern": "Mobility",
+    "muscle_group": "Glutes",
+    "equipment": [
+      "Bodyweight"
+    ]
+  },
+  {
+    "name": "Thoracic Open Books",
+    "pattern": "Mobility",
+    "muscle_group": "Core",
+    "equipment": [
+      "Bodyweight"
+    ]
+  }
 ]

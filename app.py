@@ -83,6 +83,41 @@ TEMPLATE_CATEGORIES = [
     "Landmine/Kettlebell", "Hypertrophy", "Glute Focus", "Strength", "Conditioning", "Full Body", "Custom",
 ]
 
+# ---------- programming layers: frequency / split / equipment ----------
+
+FREQUENCY_OPTIONS = ["", "1x/week", "2x/week", "3x/week", "4x/week", "5x/week", "6x/week"]
+SPLIT_OPTIONS = ["", "Full Body", "Upper/Lower", "Push/Pull/Legs", "Body Part Split"]
+EQUIPMENT_PREF_OPTIONS = ["Full Gym", "No Free Weights", "Machines Only", "Bodyweight Only"]
+
+FREE_WEIGHT_EQUIPMENT = {"Barbell", "Dumbbell", "Kettlebell"}
+MACHINE_FRIENDLY_EQUIPMENT = {"Machine", "Cable", "Cardio Machine", "Bodyweight"}
+BODYWEIGHT_FRIENDLY_EQUIPMENT = {"Bodyweight"}
+
+# frequency's leading digit -> a sensible default split; still editable, never locked
+SPLIT_SUGGESTION_BY_FREQUENCY_DIGIT = {
+    "1": "Full Body", "2": "Full Body", "3": "Full Body",
+    "4": "Upper/Lower", "5": "Push/Pull/Legs", "6": "Push/Pull/Legs",
+}
+
+
+def suggest_split(frequency):
+    if not frequency:
+        return ""
+    return SPLIT_SUGGESTION_BY_FREQUENCY_DIGIT.get(frequency[0], "")
+
+
+def exercise_allowed(entry, equipment_pref):
+    if not equipment_pref or equipment_pref == "Full Gym":
+        return True
+    eq = set(entry.get("equipment", []))
+    if equipment_pref == "No Free Weights":
+        return not (eq & FREE_WEIGHT_EQUIPMENT)
+    if equipment_pref == "Machines Only":
+        return bool(eq & MACHINE_FRIENDLY_EQUIPMENT)
+    if equipment_pref == "Bodyweight Only":
+        return bool(eq & BODYWEIGHT_FRIENDLY_EQUIPMENT)
+    return True
+
 
 def slot_letter(idx):
     return string.ascii_uppercase[idx] if idx < 26 else str(idx + 1)
@@ -195,9 +230,9 @@ def load_exercise_library():
     return json.loads(EXERCISE_LIBRARY_PATH.read_text())
 
 
-def exercise_options():
+def exercise_options(equipment_pref=None):
     lib = load_exercise_library()
-    return [""] + sorted(e["name"] for e in lib)
+    return [""] + sorted(e["name"] for e in lib if exercise_allowed(e, equipment_pref))
 
 
 def last_performance(client, exercise_name, before_date=None):
@@ -221,6 +256,9 @@ def blank_program():
         "id": "",
         "name": "",
         "category": TEMPLATE_CATEGORIES[0],
+        "frequency": "",
+        "split": "",
+        "equipment_pref": "Full Gym",
         "warmup": {"duration_min": 10, "notes": ""},
         "blocks": [
             {"label": f"Block {i + 1}", "notes": "",
@@ -481,8 +519,13 @@ def render_program_blocks_editor(state, base_id, client=None):
     """Warmup + dynamic Blocks + FINISHER editing UI, mutating `state` in
     place. Shared between per-client-day editing (client passed, so "last
     time" lookups work) and standalone Program Library template editing
-    (client=None, no per-client history to show)."""
-    options = exercise_options()
+    (client=None, no per-client history to show). The exercise dropdown is
+    filtered by the client's equipment preference when editing a client's
+    day, or by the template's own equipment preference when editing a
+    template — so a "No Free Weights" client never even sees a barbell
+    option to accidentally pick."""
+    equipment_pref = client.get("equipment_pref") if client else state.get("equipment_pref")
+    options = exercise_options(equipment_pref)
 
     st.subheader("Warmup / Stretch")
     c1, c2 = st.columns([1, 3])
@@ -535,8 +578,31 @@ def render_workout_editor(client, target_date):
     templates = load_templates()
     if templates:
         with st.expander("Load from a saved program"):
+            client_freq = client.get("training_frequency")
+            client_split = client.get("split_preference")
+            client_equip = client.get("equipment_pref")
+            has_prefs = bool(client_freq or client_split or (client_equip and client_equip != "Full Gym"))
+
+            show_all = not has_prefs
+            if has_prefs:
+                show_all = st.checkbox("Show all programs (ignore this client's preferences)",
+                                        key=f"tplshowall_{base_id}")
+
+            matching = templates
+            if not show_all:
+                if client_freq:
+                    matching = [t for t in matching if not t.get("frequency") or t.get("frequency") == client_freq]
+                if client_split:
+                    matching = [t for t in matching if not t.get("split") or t.get("split") == client_split]
+                if client_equip and client_equip != "Full Gym":
+                    matching = [t for t in matching
+                                if t.get("equipment_pref", "Full Gym") in ("Full Gym", client_equip)]
+                if has_prefs and len(matching) < len(templates):
+                    st.caption(f"Filtered to {client['name']}'s preferences "
+                               f"({', '.join(x for x in [client_freq, client_split, client_equip] if x and x != 'Full Gym')}).")
+
             cat = st.selectbox("Category", ["All"] + TEMPLATE_CATEGORIES, key=f"tplcat_{base_id}")
-            candidates = templates if cat == "All" else [t for t in templates if t["category"] == cat]
+            candidates = matching if cat == "All" else [t for t in matching if t["category"] == cat]
             if candidates:
                 tpl_names = [t["name"] for t in candidates]
                 picked_tpl = st.selectbox("Program", tpl_names, key=f"tplpick_{base_id}")
@@ -549,7 +615,8 @@ def render_workout_editor(client, target_date):
                     st.success(f"Loaded \"{picked_tpl}\". Review/adjust weights below, then Save.")
                     st.rerun()
             else:
-                st.caption("No programs in this category yet — build one in the Program Library tab.")
+                st.caption("No programs match. Try \"Show all programs\" above, "
+                           "or build one in the Program Library tab.")
 
     render_program_blocks_editor(workout, base_id, client=client)
 
@@ -816,6 +883,15 @@ def page_add_client():
         st.subheader("Health flags")
         injuries = st.text_input("Injuries / limitations (comma separated)")
 
+        st.subheader("Programming preferences")
+        col5, col6, col7 = st.columns(3)
+        with col5:
+            training_frequency = st.selectbox("Training frequency", FREQUENCY_OPTIONS)
+        with col6:
+            split_preference = st.selectbox("Split preference", SPLIT_OPTIONS)
+        with col7:
+            equipment_pref = st.selectbox("Equipment", EQUIPMENT_PREF_OPTIONS)
+
         st.subheader("Baseline")
         col3, col4 = st.columns(2)
         with col3:
@@ -839,6 +915,9 @@ def page_add_client():
                     "health_flags": {
                         "injuries": [i.strip() for i in injuries.split(",") if i.strip()]
                     },
+                    "training_frequency": training_frequency,
+                    "split_preference": split_preference,
+                    "equipment_pref": equipment_pref,
                     "baseline": {
                         "date": str(start_date),
                         "weight_lb": baseline_weight or None,
@@ -877,6 +956,10 @@ def tab_overview(client):
         st.write(f"Date: {b.get('date') or '—'}")
         st.write(f"Weight: {b.get('weight_lb') or '—'} lb")
         st.write(f"Waist: {b.get('waist_in') or '—'} in")
+        st.subheader("Programming preferences")
+        st.write(f"Frequency: {client.get('training_frequency') or '—'}")
+        st.write(f"Split: {client.get('split_preference') or '—'}")
+        st.write(f"Equipment: {client.get('equipment_pref') or 'Full Gym'}")
 
     with st.expander("Edit profile"):
         with st.form("edit_profile_form"):
@@ -888,6 +971,17 @@ def tab_overview(client):
             mantra = st.text_input("Mantra", value=client.get("mantra", ""))
             injuries_text = st.text_input("Injuries / limitations (comma separated)",
                                            value=", ".join(client["health_flags"].get("injuries", [])))
+            st.caption("Programming preferences")
+            pc1, pc2, pc3 = st.columns(3)
+            freq_idx = FREQUENCY_OPTIONS.index(client.get("training_frequency", "")) \
+                if client.get("training_frequency", "") in FREQUENCY_OPTIONS else 0
+            training_frequency = pc1.selectbox("Training frequency", FREQUENCY_OPTIONS, index=freq_idx)
+            split_idx = SPLIT_OPTIONS.index(client.get("split_preference", "")) \
+                if client.get("split_preference", "") in SPLIT_OPTIONS else 0
+            split_preference = pc2.selectbox("Split preference", SPLIT_OPTIONS, index=split_idx)
+            equip_idx = EQUIPMENT_PREF_OPTIONS.index(client.get("equipment_pref", "Full Gym")) \
+                if client.get("equipment_pref", "Full Gym") in EQUIPMENT_PREF_OPTIONS else 0
+            equipment_pref = pc3.selectbox("Equipment", EQUIPMENT_PREF_OPTIONS, index=equip_idx)
             status = st.selectbox("Status", options=["active", "paused", "ended"],
                                    index=["active", "paused", "ended"].index(client.get("status", "active")))
             if st.form_submit_button("Save changes"):
@@ -896,6 +990,9 @@ def tab_overview(client):
                 client["goals"] = {"primary": primary_goal, "why": goal_why}
                 client["mantra"] = mantra.strip()
                 client["health_flags"] = {"injuries": [i.strip() for i in injuries_text.split(",") if i.strip()]}
+                client["training_frequency"] = training_frequency
+                client["split_preference"] = split_preference
+                client["equipment_pref"] = equipment_pref
                 client["status"] = status
                 save_client(client)
                 st.success("Updated.")
@@ -1025,15 +1122,31 @@ def page_program_library():
     templates = load_templates()
 
     st.subheader("Saved Programs")
-    cat_filter = st.selectbox("Filter by category", ["All"] + TEMPLATE_CATEGORIES, key="lib_cat_filter")
-    filtered = templates if cat_filter == "All" else [t for t in templates if t["category"] == cat_filter]
+    f1, f2, f3, f4 = st.columns(4)
+    cat_filter = f1.selectbox("Category", ["All"] + TEMPLATE_CATEGORIES, key="lib_cat_filter")
+    freq_filter = f2.selectbox("Frequency", ["All"] + [f for f in FREQUENCY_OPTIONS if f], key="lib_freq_filter")
+    split_filter = f3.selectbox("Split", ["All"] + [s for s in SPLIT_OPTIONS if s], key="lib_split_filter")
+    equip_filter = f4.selectbox("Equipment", ["All"] + EQUIPMENT_PREF_OPTIONS, key="lib_equip_filter")
+
+    filtered = templates
+    if cat_filter != "All":
+        filtered = [t for t in filtered if t["category"] == cat_filter]
+    if freq_filter != "All":
+        filtered = [t for t in filtered if t.get("frequency") == freq_filter]
+    if split_filter != "All":
+        filtered = [t for t in filtered if t.get("split") == split_filter]
+    if equip_filter != "All":
+        filtered = [t for t in filtered if t.get("equipment_pref", "Full Gym") == equip_filter]
 
     if not filtered:
-        st.info("No programs yet in this category." if templates else
+        st.info("No programs match these filters." if templates else
                 "No programs yet — build your first one below.")
     else:
         for t in filtered:
-            with st.expander(f"{t['name']} — {t['category']}"):
+            tags = " · ".join(x for x in [t["category"], t.get("frequency"), t.get("split"),
+                                           t.get("equipment_pref") if t.get("equipment_pref") != "Full Gym" else None]
+                               if x)
+            with st.expander(f"{t['name']} — {tags}"):
                 render_workout_card(None, t, title=t["name"])
                 c1, c2 = st.columns(2)
                 if c1.button("Edit", key=f"edittpl_{t['id']}"):
@@ -1061,6 +1174,20 @@ def page_program_library():
     draft["name"] = c1.text_input("Program name", value=draft.get("name", ""), key=f"{state_key}_name")
     cat_index = TEMPLATE_CATEGORIES.index(draft["category"]) if draft.get("category") in TEMPLATE_CATEGORIES else 0
     draft["category"] = c2.selectbox("Category", TEMPLATE_CATEGORIES, index=cat_index, key=f"{state_key}_cat")
+
+    c3, c4, c5 = st.columns(3)
+    freq_index = FREQUENCY_OPTIONS.index(draft.get("frequency", "")) if draft.get("frequency") in FREQUENCY_OPTIONS else 0
+    new_freq = c3.selectbox("Frequency", FREQUENCY_OPTIONS, index=freq_index, key=f"{state_key}_freq")
+    if new_freq != draft.get("frequency", ""):
+        draft["split"] = suggest_split(new_freq)
+    draft["frequency"] = new_freq
+    split_index = SPLIT_OPTIONS.index(draft.get("split", "")) if draft.get("split") in SPLIT_OPTIONS else 0
+    draft["split"] = c4.selectbox("Split (auto-suggested, editable)", SPLIT_OPTIONS, index=split_index,
+                                   key=f"{state_key}_split")
+    equip_index = EQUIPMENT_PREF_OPTIONS.index(draft.get("equipment_pref", "Full Gym")) \
+        if draft.get("equipment_pref", "Full Gym") in EQUIPMENT_PREF_OPTIONS else 0
+    draft["equipment_pref"] = c5.selectbox("Equipment", EQUIPMENT_PREF_OPTIONS, index=equip_index,
+                                            key=f"{state_key}_equip")
 
     render_program_blocks_editor(draft, state_key, client=None)
     draft["day_notes"] = st.text_area("Program notes", value=draft.get("day_notes", ""), key=f"{state_key}_notes")

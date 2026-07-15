@@ -68,7 +68,10 @@
       ]
     },
     "day_notes": "Great fill-in day when the platforms are busy \u2014 only needs one landmine + one bell.",
-    "id": "landmine-kettlebell-burner"
+    "id": "landmine-kettlebell-burner",
+    "frequency": "",
+    "split": "",
+    "equipment_pref": "Full Gym"
   },
   {
     "name": "Hypertrophy \u2014 Push Focus",
@@ -162,7 +165,10 @@
       ]
     },
     "day_notes": "Standard hypertrophy push day \u2014 8-15 rep range throughout, moderate rest.",
-    "id": "hypertrophy-push-focus"
+    "id": "hypertrophy-push-focus",
+    "frequency": "",
+    "split": "",
+    "equipment_pref": "Full Gym"
   },
   {
     "name": "Glute Buster",
@@ -233,7 +239,10 @@
       ]
     },
     "day_notes": "",
-    "id": "glute-buster"
+    "id": "glute-buster",
+    "frequency": "",
+    "split": "",
+    "equipment_pref": "Full Gym"
   },
   {
     "name": "Strength \u2014 Lower Body",
@@ -304,7 +313,10 @@
       ]
     },
     "day_notes": "Heavy day \u2014 prioritize the main lifts, keep accessory volume in reserve.",
-    "id": "strength-lower-body"
+    "id": "strength-lower-body",
+    "frequency": "",
+    "split": "",
+    "equipment_pref": "Full Gym"
   },
   {
     "name": "Conditioning \u2014 Metabolic Circuit",
@@ -375,7 +387,10 @@
       ]
     },
     "day_notes": "Keep rest short throughout \u2014 this is meant to be uncomfortable.",
-    "id": "conditioning-metabolic-circuit"
+    "id": "conditioning-metabolic-circuit",
+    "frequency": "",
+    "split": "",
+    "equipment_pref": "Full Gym"
   },
   {
     "name": "Day 1 \u2014 Hinge + Pull (Landmine/KB)",
@@ -472,7 +487,10 @@
       ]
     },
     "day_notes": "3-day Landmine/Kettlebell block \u2014 Day 1 of 3. Target rep range 12-15.",
-    "id": "day-1-hinge-pull-landmine-kb"
+    "id": "day-1-hinge-pull-landmine-kb",
+    "frequency": "3x/week",
+    "split": "Full Body",
+    "equipment_pref": "Full Gym"
   },
   {
     "name": "Day 2 \u2014 Push + Core (Landmine/KB)",
@@ -578,7 +596,10 @@
       ]
     },
     "day_notes": "3-day Landmine/Kettlebell block \u2014 Day 2 of 3. Target rep range 10-12.",
-    "id": "day-2-push-core-landmine-kb"
+    "id": "day-2-push-core-landmine-kb",
+    "frequency": "3x/week",
+    "split": "Full Body",
+    "equipment_pref": "Full Gym"
   },
   {
     "name": "Day 3 \u2014 Full Body / Patterns (Landmine/KB)",
@@ -675,6 +696,9 @@
       ]
     },
     "day_notes": "3-day Landmine/Kettlebell block \u2014 Day 3 of 3. Target rep range 8-10.",
-    "id": "day-3-full-body-patterns-landmine-kb"
+    "id": "day-3-full-body-patterns-landmine-kb",
+    "frequency": "3x/week",
+    "split": "Full Body",
+    "equipment_pref": "Full Gym"
   }
 ]
